@@ -668,3 +668,120 @@
     animation: none;
   }
 }
+
+.desktop[hidden] {
+  display: none;
+}
+.l-stacked {
+  grid-template-rows: 3fr 2fr;
+}
+.snap-full {
+  width: 100%;
+  height: 40px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  font-weight: 600;
+}
+.snap-full:hover,
+.snap-full:focus-visible {
+  border-color: var(--accent);
+  background: var(--accent-weak);
+}
+
+/* ---------- tablet (600–1023 px): touch-sized chrome, no rail, no dragging ---------- */
+.desktop.tablet {
+  --panel-h: 44px;
+}
+.desktop.tablet .pbtn,
+.desktop.tablet .task {
+  height: 40px;
+  min-width: 44px;
+}
+.desktop.tablet .task span,
+.desktop.tablet .pbtn.apps kbd,
+.desktop.tablet .clock-date {
+  display: none;
+}
+.desktop.tablet .tbar {
+  height: 44px;
+  cursor: default;
+}
+.desktop.tablet .ctl button {
+  width: 44px;
+  height: 40px;
+}
+.desktop.tablet .win-body {
+  padding: 22px 22px 28px;
+}
+.desktop.tablet .session-menu button {
+  min-height: 44px;
+}
+.desktop.tablet .chip {
+  padding: 12px 14px;
+}
+
+/* ---------- phone sheets: docked terminal and full-screen search ---------- */
+.m-sheet .terminal.docked {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  background: var(--term-bg);
+}
+.term-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 14px 14px 8px;
+}
+.term-foot {
+  flex: none;
+  padding: 8px 12px calc(10px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border);
+  background: var(--surface-1);
+}
+.term-foot .chips {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  margin: 0 0 8px;
+  scrollbar-width: none;
+}
+.term-foot .chip {
+  flex: none;
+  padding: 13px 14px;
+}
+.term-foot .cmd-echo.live {
+  margin-top: 0;
+}
+.m-sheet .input-row input {
+  font-size: 16px; /* 16px or more stops iOS zooming in on focus */
+  min-height: 36px;
+}
+.pal-wrap.sheet {
+  position: static;
+  display: block;
+  height: 100%;
+  padding: 0;
+  background: none;
+}
+.pal-wrap.sheet .palette {
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  animation: none;
+  background: transparent;
+}
+.pal-wrap.sheet .pal-list {
+  max-height: none;
+}
+.pal-wrap.sheet .pi {
+  min-height: 56px;
+}
+.pal-wrap.sheet .pal-foot,
+.pal-wrap.sheet .pal-in kbd {
+  display: none;
+}

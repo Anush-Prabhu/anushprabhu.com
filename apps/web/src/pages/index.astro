@@ -1,8 +1,11 @@
 ---
 import Base from '../layouts/Base.astro'
 import AboutContent from '../components/content/AboutContent.astro'
+import MobileHome from '../components/content/MobileHome.astro'
 ---
 
 <Base app="about" path="~">
-  <AboutContent variant="home" />
+  <AboutContent variant="home">
+    <MobileHome slot="after-intro" />
+  </AboutContent>
 </Base>

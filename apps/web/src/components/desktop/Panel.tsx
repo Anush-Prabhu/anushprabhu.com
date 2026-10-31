@@ -38,7 +38,8 @@ function Clock() {
   const time = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
   return (
     <time class="clock" dateTime={now.toISOString()} title="Your local time">
-      {date} {time}
+      <span class="clock-date">{date} </span>
+      {time}
     </time>
   )
 }

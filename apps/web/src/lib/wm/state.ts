@@ -49,7 +49,8 @@ export interface WmState {
 }
 
 export type Action =
-  | { type: 'open'; id: string; min?: Size; size?: Size }
+  /** `maximized` opens the window full-screen (tablet), keeping a floating rectangle for Restore. */
+  | { type: 'open'; id: string; min?: Size; size?: Size; maximized?: boolean }
   | { type: 'close'; id: string }
   | { type: 'focus'; id: string }
   | { type: 'focusNext' }
@@ -61,6 +62,8 @@ export type Action =
   | { type: 'assistFill'; zone: number; id: string }
   | { type: 'assistDismiss' }
   | { type: 'setWork'; work: Rect }
+  /** Tablet mode has no free-floating windows: maximise any that are floating. */
+  | { type: 'maximizeFloating' }
 
 export const DEFAULT_SIZE: Size = { w: 760, h: 540 }
 
@@ -119,7 +122,17 @@ export function reduce(s: WmState, a: Action): WmState {
       }
       const min = a.min ?? DEFAULT_MIN
       const bounds = cascade(s.work, a.size ?? DEFAULT_SIZE, s.windows.length)
-      const win: Win = { id: a.id, mode: 'floating', bounds, restoreBounds: bounds, z: s.z + 1, min }
+      const win: Win = a.maximized
+        ? {
+            id: a.id,
+            mode: 'maximized',
+            prevMode: 'floating',
+            bounds: { ...s.work },
+            restoreBounds: bounds,
+            z: s.z + 1,
+            min,
+          }
+        : { id: a.id, mode: 'floating', bounds, restoreBounds: bounds, z: s.z + 1, min }
       return { ...s, windows: [...s.windows, win], z: s.z + 1, focused: a.id }
     }
 
@@ -238,6 +251,18 @@ export function reduce(s: WmState, a: Action): WmState {
 
     case 'assistDismiss':
       return s.assist ? { ...s, assist: null } : s
+
+    case 'maximizeFloating': {
+      if (!s.windows.some((w) => w.mode === 'floating')) return s
+      return {
+        ...s,
+        windows: s.windows.map((w) =>
+          w.mode === 'floating'
+            ? { ...w, mode: 'maximized', prevMode: 'floating', restoreBounds: w.bounds, bounds: { ...s.work } }
+            : w,
+        ),
+      }
+    }
 
     case 'setWork':
       return { ...s, work: a.work, windows: s.windows.map((w) => layoutBounds(w, a.work)) }

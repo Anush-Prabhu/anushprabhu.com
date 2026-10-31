@@ -1,6 +1,7 @@
 ---
 import '../styles/base.css'
 import Desktop from '../components/desktop/Desktop'
+import { Icon } from '../components/desktop/Icon'
 import { site, profile } from '../data/profile'
 import { getSiteData } from '../lib/content'
 import { NAV, type AppId } from '../components/desktop/apps'
@@ -24,6 +25,7 @@ const cleanPath =
     .replace(/(.)\/$/, '$1') || '/'
 const canonical = new URL(cleanPath, site.url).href
 const current = cleanPath
+const isHome = cleanPath === '/'
 const data = await getSiteData()
 ---
 
@@ -31,7 +33,7 @@ const data = await getSiteData()
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
@@ -43,8 +45,9 @@ const data = await getSiteData()
     <meta property="og:url" content={canonical} />
     <meta name="twitter:card" content="summary" />
     <script is:inline>
-      // Runs before paint: mark JS available and, on wide screens, hide the plain view while the desktop starts.
-      // The CSS falls back to the plain view after 3 s if the desktop never mounts.
+      // Runs before paint: mark JS available and, where the desktop will load (tablet and up), hide the plain
+      // view while it starts. The CSS falls back to the plain view after 3 s if the desktop never mounts.
+      // Keep the media query in sync with `client:media` below and ACTIVE_QUERY in Desktop.tsx.
       ;(function () {
         var d = document.documentElement
         d.setAttribute('data-js', '')
@@ -52,11 +55,12 @@ const data = await getSiteData()
         try {
           plain = localStorage.getItem('view') === 'plain'
         } catch (e) {}
-        if (!plain && window.matchMedia('(min-width: 1024px)').matches) d.setAttribute('data-view', 'pending')
+        if (!plain && window.matchMedia('(min-width: 600px) and (min-height: 500px)').matches)
+          d.setAttribute('data-view', 'pending')
       })()
     </script>
   </head>
-  <body>
+  <body data-title={title ?? 'Home'} data-home={isHome ? '' : undefined}>
     <a class="skip-link plain" href="#content">
       Skip to content
     </a>
@@ -79,12 +83,22 @@ const data = await getSiteData()
         <button class="open-desktop" type="button" data-open-desktop>
           Open desktop view
         </button>
+        <button class="m-icon m-only js-only" type="button" data-m-open="search" aria-label="Search">
+          <Icon name="search" size={20} />
+        </button>
       </div>
     </header>
     <main id="content" class="plain plain-main">
       <div class="frame">
-        <div class="frame-bar" aria-hidden="true">
-          {profile.user}@{profile.host}: {path}
+        <div class="frame-bar">
+          {!isHome && (
+            <a class="m-back m-only" href="/" aria-label="Back to home">
+              <Icon name="back" size={20} />
+            </a>
+          )}
+          <span aria-hidden="true">
+            {profile.user}@{profile.host}: {path}
+          </span>
         </div>
         <div class="frame-body">
           <slot />
@@ -97,16 +111,30 @@ const data = await getSiteData()
       </p>
     </footer>
 
-    <Desktop client:media="(min-width: 1024px)" initialApp={app} data={data} />
+    <nav class="plain m-dock m-only" aria-label="Phone apps">
+      <a href="/" aria-current={isHome ? 'page' : undefined}>
+        <Icon name="home" size={22} />
+        <span>Home</span>
+      </a>
+      <button type="button" class="js-only" data-m-open="terminal">
+        <Icon name="terminal" size={22} />
+        <span>Terminal</span>
+      </button>
+      <button type="button" class="js-only" data-m-open="search">
+        <Icon name="search" size={22} />
+        <span>Search</span>
+      </button>
+      <button type="button" class="js-only" data-m-open="recent">
+        <Icon name="cards" size={22} />
+        <span>Recent</span>
+      </button>
+    </nav>
+
+    <Desktop client:media="(min-width: 600px) and (min-height: 500px)" initialApp={app} data={data} />
 
     <script>
-      // Plain view → desktop view (only offered on wide screens, see CSS).
-      document.querySelector('[data-open-desktop]')?.addEventListener('click', () => {
-        try {
-          localStorage.removeItem('view')
-        } catch {}
-        location.reload()
-      })
+      import { boot } from '../components/mobile/boot'
+      boot()
     </script>
   </body>
 </html>

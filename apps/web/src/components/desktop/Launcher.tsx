@@ -6,6 +6,8 @@ export interface LauncherProps {
   index: SearchItem[]
   onOpen(item: SearchItem): void
   onClose(): void
+  /** `sheet`: fills a phone sheet instead of floating over the desktop. */
+  variant?: 'overlay' | 'sheet'
 }
 
 export function Launcher(p: LauncherProps) {
@@ -51,12 +53,16 @@ export function Launcher(p: LauncherProps) {
   }
 
   return (
-    <div class="pal-wrap" onPointerDown={(e) => e.target === e.currentTarget && p.onClose()}>
+    <div
+      class={`pal-wrap${p.variant === 'sheet' ? ' sheet' : ''}`}
+      onPointerDown={(e) => e.target === e.currentTarget && p.onClose()}
+    >
       <div
         class="palette"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Search apps and content"
+        // Inside a phone sheet the sheet is already the dialog; don't nest a second one.
+        role={p.variant === 'sheet' ? undefined : 'dialog'}
+        aria-modal={p.variant === 'sheet' ? undefined : 'true'}
+        aria-label={p.variant === 'sheet' ? undefined : 'Search apps and content'}
         onKeyDown={onKey as never}
       >
         <div class="pal-in">

@@ -18,7 +18,7 @@ export const TITLEBAR_H = 34
 const GRAB_MARGIN = 120
 export const DEFAULT_MIN: Size = { w: 360, h: 280 }
 
-export type LayoutId = 'halves' | 'two-thirds' | 'main-stack' | 'quadrants' | 'thirds'
+export type LayoutId = 'halves' | 'two-thirds' | 'main-stack' | 'quadrants' | 'thirds' | 'stacked'
 
 export interface Layout {
   id: LayoutId
@@ -27,7 +27,12 @@ export interface Layout {
   zones: Rect[]
   /** Zone names for screen readers, same order as `zones`. */
   zoneLabels: string[]
+  /** Only offered on tall work areas (portrait tablets), where side-by-side doesn't fit. */
+  portraitOnly?: boolean
 }
+
+/** A work area counts as portrait when it is nearly as tall as it is wide, or taller. */
+export const isPortrait = (work: Rect) => work.h >= work.w * 0.9
 
 export const LAYOUTS: Layout[] = [
   {
@@ -79,6 +84,16 @@ export const LAYOUTS: Layout[] = [
     ],
     zoneLabels: ['left third', 'middle third', 'right third'],
   },
+  {
+    id: 'stacked',
+    label: 'Top and bottom',
+    zones: [
+      { x: 0, y: 0, w: 1, h: 3 / 5 },
+      { x: 0, y: 3 / 5, w: 1, h: 2 / 5 },
+    ],
+    zoneLabels: ['top', 'bottom'],
+    portraitOnly: true,
+  },
 ]
 
 export const layoutById = (id: LayoutId): Layout => {
@@ -106,6 +121,7 @@ export const fits = (r: Rect, min: Size): boolean => r.w >= min.w && r.h >= min.
 
 /** A layout is offered only if every zone can hold a window of `min` size in the current work area. */
 export function isFeasible(layout: Layout, work: Rect, min: Size = DEFAULT_MIN): boolean {
+  if (layout.portraitOnly && !isPortrait(work)) return false
   return layout.zones.every((z) => fits(zoneRect(work, z), min))
 }
 

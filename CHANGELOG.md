@@ -2,6 +2,25 @@
 
 Versions follow [Semantic Versioning](https://semver.org). `0.x` releases are pre-launch milestones.
 
+## v0.3.0 — 2026-10-31 · Milestone 3: phone and tablet
+
+### Added
+- **Phone workspace** (< 600 px wide or < 500 px tall): Linux-style status bar, full-screen pages with a back bar, home screen with search and an app grid, bottom dock (Home, Terminal, Search, Recent). Works without JavaScript except the three sheets.
+- **Phone sheets** that load their code only when tapped: a terminal with commands and prompt pinned above the keyboard (the keyboard never opens by itself), full-screen search, and recently visited pages. The phone's Back button closes them.
+- **Tablet mode** (600–1023 px wide, ≥ 500 px tall): the desktop without the shortcut rail, 44 px touch controls, windows open full-screen, no free dragging, two-up split: side by side in landscape, stacked top/bottom in portrait. Tapping maximise opens the layout menu, which also has Full screen.
+- New "Top and bottom" snap layout, offered only on portrait screens.
+- Resizing a desktop browser to phone width swaps to the phone layout and back without losing windows.
+- `/site-data.json` for the phone sheets.
+- Tests: 33 unit tests and 45 Playwright tests, including iPhone 13 and iPad Mini profiles, touch-target sizes, rotation and on-demand loading.
+
+### Measured
+- JS 28.3 KB gzip in total (budget 40 KB); a phone loads about 1.6 KB up front.
+- Lighthouse: phone `/` and `/experience` 99 / 100 / 100 / 100; desktop `/` 100 / 100 / 100 / 100.
+
+### Changed
+- `resume` in the terminal now says plainly that the PDF is being prepared.
+- Astro's dev toolbar is off (it covered the phone dock during development; it never ships).
+
 ## v0.2.0 — 2026-10-31 · Milestone 2: interactive desktop prototype
 
 ### Added

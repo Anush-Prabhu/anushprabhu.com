@@ -26,8 +26,9 @@ test.describe('without JavaScript', () => {
   })
 })
 
-test.describe('narrow screens get the plain view', () => {
-  for (const width of [320, 390, 768]) {
+test.describe('phone widths get the plain pages, not the desktop', () => {
+  // 600 px and wider get the tablet desktop (tests/tablet.spec.ts).
+  for (const width of [320, 390, 599]) {
     test(`no desktop and no horizontal scroll at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 800 })
       await page.goto('/experience')

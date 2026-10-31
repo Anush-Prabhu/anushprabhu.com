@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks'
-import { GAP, type LayoutId, type Rect } from '../../lib/wm/geometry'
+import { GAP, isFeasible, layoutById, type LayoutId, type Rect } from '../../lib/wm/geometry'
 import { createStore, findWin } from '../../lib/wm/state'
 import type { SiteData } from '../../lib/site-data'
 import { APPS, SHORTCUTS, appForPath, type AppId } from './apps'
@@ -15,16 +15,27 @@ import { useWm } from './useStore'
 import { Window } from './Window'
 import './desktop.css'
 
-const PANEL_H = 32
-const RAIL_W = 92
 const SNAP_CLOSE_DELAY = 300
 
-const computeWork = (): Rect => ({
-  x: RAIL_W,
-  y: PANEL_H + GAP,
-  w: window.innerWidth - RAIL_W - GAP,
-  h: window.innerHeight - PANEL_H - 2 * GAP,
-})
+/** Keep in sync with `client:media` in layouts/Base.astro and the CSS in styles/base.css. */
+const ACTIVE_QUERY = '(min-width: 600px) and (min-height: 500px)'
+const DESKTOP_QUERY = '(min-width: 1024px)'
+
+/** desktop: full window manager · tablet: no rail, windows full-screen or split · off: phone sizes (plain pages). */
+type Mode = 'desktop' | 'tablet' | 'off'
+const getMode = (): Mode =>
+  !window.matchMedia(ACTIVE_QUERY).matches ? 'off' : window.matchMedia(DESKTOP_QUERY).matches ? 'desktop' : 'tablet'
+
+const CHROME: Record<Exclude<Mode, 'off'>, { panel: number; rail: number }> = {
+  desktop: { panel: 32, rail: 92 },
+  tablet: { panel: 44, rail: 0 },
+}
+
+const computeWork = (mode: Mode): Rect => {
+  const c = CHROME[mode === 'off' ? 'tablet' : mode]
+  const left = c.rail || GAP
+  return { x: left, y: c.panel + GAP, w: window.innerWidth - left - GAP, h: window.innerHeight - c.panel - 2 * GAP }
+}
 
 const readPlain = () => {
   try {
@@ -51,7 +62,10 @@ export interface DesktopProps {
 
 function DesktopView({ initialApp, data }: DesktopProps) {
   const [plain, setPlain] = useState(readPlain)
-  const store = useMemo(() => createStore(computeWork()), [])
+  const [mode, setMode] = useState<Mode>(getMode)
+  const modeRef = useRef(mode)
+  modeRef.current = mode
+  const store = useMemo(() => createStore(computeWork(getMode())), [])
   const s = useWm(store)
   const [paths, setPaths] = useState<Partial<Record<AppId, string>>>(() => ({ [initialApp]: currentPath() || '/' }))
   const [launcher, setLauncher] = useState(false)
@@ -79,7 +93,8 @@ function DesktopView({ initialApp, data }: DesktopProps) {
           return { ...p, [app]: next }
         })
       }
-      dispatch({ type: 'open', id: app, min: def.min, size: def.size })
+      // Tablets have no free-floating windows: new windows open full-screen.
+      dispatch({ type: 'open', id: app, min: def.min, size: def.size, maximized: modeRef.current === 'tablet' })
       if (opts.focus !== false) focusInto.current = app
     },
     [store],
@@ -89,8 +104,20 @@ function DesktopView({ initialApp, data }: DesktopProps) {
     (app: AppId, path: string) => {
       openApp('terminal', undefined, { focus: false })
       openApp(app, path, { push: false, focus: false })
-      dispatch({ type: 'snap', id: 'terminal', layout: 'halves', zone: 0 })
-      dispatch({ type: 'snap', id: app, layout: 'halves', zone: 1 })
+      // Side by side where it fits; stacked (content on top) on portrait tablets; otherwise content full-screen.
+      const work = store.get().work
+      const min = {
+        w: Math.max(APPS.terminal.min.w, APPS[app].min.w),
+        h: Math.max(APPS.terminal.min.h, APPS[app].min.h),
+      }
+      if (isFeasible(layoutById('halves'), work, min)) {
+        dispatch({ type: 'snap', id: 'terminal', layout: 'halves', zone: 0 })
+        dispatch({ type: 'snap', id: app, layout: 'halves', zone: 1 })
+      } else if (isFeasible(layoutById('stacked'), work, min)) {
+        dispatch({ type: 'snap', id: app, layout: 'stacked', zone: 0 })
+        dispatch({ type: 'snap', id: 'terminal', layout: 'stacked', zone: 1 })
+      }
+      dispatch({ type: 'focus', id: app })
     },
     [openApp],
   )
@@ -107,15 +134,26 @@ function DesktopView({ initialApp, data }: DesktopProps) {
     const html = node && extractContent(node.outerHTML)
     if (html) contentCache.set(location.pathname.replace(/\.html$/, ''), html)
     arrangeDefault(initialApp, currentPath() || '/')
-    document.documentElement.setAttribute('data-view', 'desktop')
   }, [plain])
+
+  // The plain page hides only while the desktop is actually showing (not at phone sizes).
+  useLayoutEffect(() => {
+    if (plain) return
+    if (mode === 'off') document.documentElement.removeAttribute('data-view')
+    else document.documentElement.setAttribute('data-view', 'desktop')
+  }, [plain, mode])
 
   useEffect(() => {
     if (plain) return
     let frame = 0
     const onResize = () => {
       cancelAnimationFrame(frame)
-      frame = requestAnimationFrame(() => dispatch({ type: 'setWork', work: computeWork() }))
+      frame = requestAnimationFrame(() => {
+        const next = getMode()
+        setMode(next)
+        dispatch({ type: 'setWork', work: computeWork(next) })
+        if (next === 'tablet') dispatch({ type: 'maximizeFloating' })
+      })
     }
     window.addEventListener('resize', onResize)
     return () => window.removeEventListener('resize', onResize)
@@ -266,7 +304,7 @@ function DesktopView({ initialApp, data }: DesktopProps) {
   const titles = Object.fromEntries(s.windows.map((w) => [w.id, visibleTitle(w.id as AppId)]))
 
   return (
-    <div class="desktop">
+    <div class={`desktop ${mode}`} hidden={mode === 'off'}>
       <h1 class="visually-hidden">Anush Prabhu: desktop view</h1>
       <Panel
         windows={s.windows}
@@ -286,30 +324,32 @@ function DesktopView({ initialApp, data }: DesktopProps) {
         onReset={reset}
       />
 
-      <nav class="rail" aria-label="Desktop shortcuts">
-        <ul
-          onKeyDown={
-            ((e: KeyboardEvent) => {
-              if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
-              e.preventDefault()
-              const items = Array.from((e.currentTarget as HTMLElement).querySelectorAll<HTMLButtonElement>('button'))
-              const i = items.indexOf(document.activeElement as HTMLButtonElement)
-              items[(i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length]?.focus()
-            }) as never
-          }
-        >
-          {SHORTCUTS.map((id) => (
-            <li key={id}>
-              <button type="button" class="sc" onClick={() => openApp(id)}>
-                <span class="tile">
-                  <Icon name={APPS[id].icon} size={22} />
-                </span>
-                {APPS[id].label}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      {mode === 'desktop' && (
+        <nav class="rail" aria-label="Desktop shortcuts">
+          <ul
+            onKeyDown={
+              ((e: KeyboardEvent) => {
+                if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
+                e.preventDefault()
+                const items = Array.from((e.currentTarget as HTMLElement).querySelectorAll<HTMLButtonElement>('button'))
+                const i = items.indexOf(document.activeElement as HTMLButtonElement)
+                items[(i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length]?.focus()
+              }) as never
+            }
+          >
+            {SHORTCUTS.map((id) => (
+              <li key={id}>
+                <button type="button" class="sc" onClick={() => openApp(id)}>
+                  <span class="tile">
+                    <Icon name={APPS[id].icon} size={22} />
+                  </span>
+                  {APPS[id].label}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
 
       <main class="work" aria-label="Windows">
         {s.windows.map((w) => {
@@ -323,6 +363,7 @@ function DesktopView({ initialApp, data }: DesktopProps) {
               title={titles[id]}
               focused={s.focused === id}
               snapOpen={snap?.id === id}
+              tablet={mode === 'tablet'}
               onFocus={() => dispatch({ type: 'focus', id })}
               onClose={() => dispatch({ type: 'close', id })}
               onMinimize={() => dispatch({ type: 'minimize', id })}
@@ -371,6 +412,11 @@ function DesktopView({ initialApp, data }: DesktopProps) {
           work={s.work}
           anchor={snap.anchor}
           takeFocus={snap.how !== 'hover'}
+          showMaximize={mode === 'tablet'}
+          onToggleMaximize={() => {
+            dispatch({ type: 'toggleMaximize', id: snap.id })
+            closeSnap(true)
+          }}
           onPick={pickLayout}
           onPair={pickPair}
           onClose={closeSnap}

@@ -20,7 +20,7 @@ describe('geometry', () => {
   })
 
   it('offers only layouts whose zones fit the minimum window size', () => {
-    expect(feasibleLayouts(WORK).map((l) => l.id)).toEqual(LAYOUTS.map((l) => l.id))
+    expect(feasibleLayouts(WORK).map((l) => l.id)).toEqual(LAYOUTS.filter((l) => !l.portraitOnly).map((l) => l.id))
     const small = { x: 0, y: 32, w: 900, h: 560 }
     const ids = feasibleLayouts(small).map((l) => l.id)
     expect(ids).toContain('halves')
@@ -229,5 +229,58 @@ describe('viewport changes', () => {
   it('default minimum is used when an app gives none', () => {
     const s = run([{ type: 'open', id: 'a' }])
     expect(win(s, 'a').min).toEqual(DEFAULT_MIN)
+  })
+})
+
+describe('tablet support', () => {
+  const PORTRAIT = { x: 8, y: 52, w: 752, h: 964 } // 768×1024 tablet, 44 px panel, no rail
+  const LANDSCAPE = { x: 8, y: 52, w: 984, h: 640 }
+
+  it('offers top-and-bottom only on portrait work areas, and halves only where they fit', () => {
+    const portrait = feasibleLayouts(PORTRAIT, { w: 380, h: 300 }).map((l) => l.id)
+    expect(portrait).toContain('stacked')
+    expect(portrait).not.toContain('halves') // 372 px halves are narrower than 380
+    const landscape = feasibleLayouts(LANDSCAPE, { w: 380, h: 300 }).map((l) => l.id)
+    expect(landscape).toContain('halves')
+    expect(landscape).not.toContain('stacked')
+    expect(feasibleLayouts(WORK).map((l) => l.id)).not.toContain('stacked')
+  })
+
+  it('opens windows maximised when asked, and Restore still has a floating size', () => {
+    let s = run([{ type: 'open', id: 'a', maximized: true }], initialState(PORTRAIT))
+    expect(win(s, 'a').mode).toBe('maximized')
+    expect(win(s, 'a').bounds).toEqual(PORTRAIT)
+    s = reduce(s, { type: 'toggleMaximize', id: 'a' })
+    expect(win(s, 'a').mode).toBe('floating')
+    expect(win(s, 'a').bounds.w).toBeLessThanOrEqual(PORTRAIT.w)
+  })
+
+  it('maximizeFloating fills the screen with every floating window and leaves snapped ones alone', () => {
+    const s = run(
+      [
+        { type: 'open', id: 'a' },
+        { type: 'open', id: 'b' },
+        { type: 'snap', id: 'b', layout: 'halves', zone: 0 },
+        { type: 'maximizeFloating' },
+      ],
+      initialState(LANDSCAPE),
+    )
+    expect(win(s, 'a').mode).toBe('maximized')
+    expect(win(s, 'a').bounds).toEqual(LANDSCAPE)
+    expect(win(s, 'b').mode).toBe('snapped')
+  })
+
+  it('rotating to portrait turns side-by-side windows floating, which tablet mode then maximises', () => {
+    let s = run(
+      [
+        { type: 'open', id: 'a', min: { w: 380, h: 300 } },
+        { type: 'snap', id: 'a', layout: 'halves', zone: 0 },
+      ],
+      initialState(LANDSCAPE),
+    )
+    s = reduce(s, { type: 'setWork', work: PORTRAIT })
+    expect(win(s, 'a').mode).toBe('floating')
+    s = reduce(s, { type: 'maximizeFloating' })
+    expect(win(s, 'a').bounds).toEqual(PORTRAIT)
   })
 })

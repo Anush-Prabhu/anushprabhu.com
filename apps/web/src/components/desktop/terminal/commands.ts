@@ -230,7 +230,19 @@ export const COMMANDS: Record<string, Command> = {
   contact: { summary: 'how to reach me', run: (_a, c) => ({ lines: contact(c.data) }) },
   resume: {
     summary: 'open the resume',
-    run: () => ({ lines: [line(t('Opening Resume…', 'dim'))], effect: { type: 'open', app: 'resume' } }),
+    run: () => ({
+      lines: [
+        line(t('The downloadable PDF is being prepared, with personal phone details removed.', 'dim')),
+        line(
+          t('Everything on it is already here: try ', 'dim'),
+          run('experience'),
+          t(' or ', 'dim'),
+          run('skills'),
+          t('.', 'dim'),
+        ),
+      ],
+      effect: { type: 'open', app: 'resume' },
+    }),
   },
   ls: {
     summary: 'list files',

@@ -12,6 +12,8 @@ export interface TerminalProps {
   active: boolean
   onEffect(effect: Exclude<Effect, { type: 'clear' } | { type: 'cd' }>): void
   onLink(url: string): void
+  /** Phone layout: commands and prompt pinned at the bottom; the keyboard is not opened automatically. */
+  docked?: boolean
 }
 
 function Prompt({ cwd, user, host }: { cwd: string[]; user: string; host: string }) {
@@ -46,7 +48,7 @@ export function Terminal(p: TerminalProps) {
   }, [entries, input])
 
   useEffect(() => {
-    if (p.active) inputRef.current?.focus({ preventScroll: true })
+    if (p.active && !p.docked) inputRef.current?.focus({ preventScroll: true })
   }, [p.active])
 
   const runCommand = (text: string) => {
@@ -143,94 +145,117 @@ export function Terminal(p: TerminalProps) {
     }
   }
 
-  return (
-    <div
-      class="terminal"
-      ref={scrollRef}
-      onClick={(e) => {
-        if (!window.getSelection()?.toString() && !(e.target as HTMLElement).closest('button, a'))
-          inputRef.current?.focus()
-      }}
-    >
-      <div role="log" aria-live="polite" aria-label="Terminal output">
-        {entries.map((entry, i) => {
-          if (entry.kind === 'welcome')
-            return (
-              <div key={i} class="welcome">
-                <p class="dim">
-                  Welcome. This works like a Kali terminal, but you never have to type: click a command and it runs.
-                  Type <span class="hi">help</span> for the full list.
-                </p>
-                <div class="chips" role="group" aria-label="Suggested commands">
-                  {CHIPS.map((c) => (
-                    <button type="button" class="chip" key={c} onClick={() => typeAndRun(c)} disabled={typing}>
-                      {c}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )
-          if (entry.kind === 'cmd')
-            return (
-              <div key={i} class="cmd-echo">
-                <Prompt cwd={entry.cwd} user={user} host={host} />
-                <div>
-                  <span class="pf" aria-hidden="true">
-                    └─
-                  </span>
-                  <span class="pu" aria-hidden="true">
-                    {'$ '}
-                  </span>
-                  <span class="visually-hidden">Command: </span>
-                  {entry.text}
-                </div>
-              </div>
-            )
+  const focusInput = (e: MouseEvent) => {
+    if (!window.getSelection()?.toString() && !(e.target as HTMLElement).closest('button, a')) inputRef.current?.focus()
+  }
+
+  const chips = (
+    <div class="chips" role="group" aria-label="Suggested commands">
+      {CHIPS.map((c) => (
+        <button type="button" class="chip" key={c} onClick={() => typeAndRun(c)} disabled={typing}>
+          {c}
+        </button>
+      ))}
+    </div>
+  )
+
+  const log = (
+    <div role="log" aria-live="polite" aria-label="Terminal output">
+      {entries.map((entry, i) => {
+        if (entry.kind === 'welcome')
           return (
-            <div key={i} class="out">
-              {entry.line.map((s, j) =>
-                s.action ? (
-                  <button
-                    type="button"
-                    key={j}
-                    class={`term-link t-${s.tone ?? 'accent'}`}
-                    onClick={() => onAction(s.action!)}
-                  >
-                    {s.text}
-                  </button>
-                ) : (
-                  <span key={j} class={s.tone ? `t-${s.tone}` : undefined}>
-                    {s.text}
-                  </span>
-                ),
-              )}
+            <div key={i} class="welcome">
+              <p class="dim">
+                Welcome. This works like a Kali terminal, but you never have to type: {p.docked ? 'tap' : 'click'} a
+                command and it runs. Type <span class="hi">help</span> for the full list.
+              </p>
+              {!p.docked && chips}
             </div>
           )
-        })}
+        if (entry.kind === 'cmd')
+          return (
+            <div key={i} class="cmd-echo">
+              <Prompt cwd={entry.cwd} user={user} host={host} />
+              <div>
+                <span class="pf" aria-hidden="true">
+                  └─
+                </span>
+                <span class="pu" aria-hidden="true">
+                  {'$ '}
+                </span>
+                <span class="visually-hidden">Command: </span>
+                {entry.text}
+              </div>
+            </div>
+          )
+        return (
+          <div key={i} class="out">
+            {entry.line.map((s, j) =>
+              s.action ? (
+                <button
+                  type="button"
+                  key={j}
+                  class={`term-link t-${s.tone ?? 'accent'}`}
+                  onClick={() => onAction(s.action!)}
+                >
+                  {s.text}
+                </button>
+              ) : (
+                <span key={j} class={s.tone ? `t-${s.tone}` : undefined}>
+                  {s.text}
+                </span>
+              ),
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+
+  const prompt = (
+    <div class="cmd-echo live">
+      <Prompt cwd={cwd} user={user} host={host} />
+      <label class="input-row">
+        <span class="pf" aria-hidden="true">
+          └─
+        </span>
+        <span class="pu" aria-hidden="true">
+          {'$ '}
+        </span>
+        <span class="visually-hidden">Type a command</span>
+        <input
+          ref={inputRef}
+          value={input}
+          onInput={(e) => setInput((e.target as HTMLInputElement).value)}
+          onKeyDown={onKey as never}
+          spellcheck={false}
+          autocapitalize="off"
+          autocomplete="off"
+          enterkeyhint="send"
+          readOnly={typing}
+        />
+      </label>
+    </div>
+  )
+
+  // Docked (phone): output scrolls above; suggested commands and the prompt stay pinned above the keyboard.
+  if (p.docked)
+    return (
+      <div class="terminal docked">
+        <div class="term-scroll" ref={scrollRef} onClick={focusInput as never}>
+          {log}
+        </div>
+        <div class="term-foot">
+          {chips}
+          {prompt}
+        </div>
       </div>
-      <div class="cmd-echo live">
-        <Prompt cwd={cwd} user={user} host={host} />
-        <label class="input-row">
-          <span class="pf" aria-hidden="true">
-            └─
-          </span>
-          <span class="pu" aria-hidden="true">
-            {'$ '}
-          </span>
-          <span class="visually-hidden">Type a command</span>
-          <input
-            ref={inputRef}
-            value={input}
-            onInput={(e) => setInput((e.target as HTMLInputElement).value)}
-            onKeyDown={onKey as never}
-            spellcheck={false}
-            autocapitalize="off"
-            autocomplete="off"
-            enterkeyhint="send"
-            readOnly={typing}
-          />
-        </label>
-      </div>
+    )
+
+  return (
+    <div class="terminal" ref={scrollRef} onClick={focusInput as never}>
+      {log}
+      {prompt}
     </div>
   )
 }

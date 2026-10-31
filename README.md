@@ -3,8 +3,9 @@
 Portfolio and resume site for Anush Prabhu, built as a Kali/Xfce-inspired desktop on top of plain, fast HTML pages.
 
 - Every page is real HTML at a real URL and works without JavaScript.
-- On screens 1024 px and wider, a desktop loads on top: windows, a terminal, a Ctrl+K launcher and Windows 11-style Snap Layouts.
-- Narrower screens get the plain view for now (the phone and tablet desktop is Milestone 3).
+- **Desktop** (≥ 1024 px): windows, a terminal, a Ctrl+K launcher and Windows 11-style Snap Layouts.
+- **Tablet** (600–1023 px wide): the same desktop with touch-sized controls; windows open full-screen or split two-up.
+- **Phone**: pages become full-screen apps with a status bar, back bar and dock; terminal, search and recent pages open as sheets.
 
 Plans and decisions: [`docs/MILESTONE_1.md`](docs/MILESTONE_1.md). Project rules: [`CLAUDE.md`](CLAUDE.md). History: [`CHANGELOG.md`](CHANGELOG.md).
 

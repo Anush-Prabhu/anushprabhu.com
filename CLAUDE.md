@@ -3,9 +3,9 @@
 Personal portfolio and resume site for Anush Prabhu (security engineering, automation, applied AI),
 to be served at **anushprabhu.com**.
 
-> **Status: Milestone 2 released as v0.2.0** (2026-10-31). Milestone 1 is v0.1.0: plan in `docs/MILESTONE_1.md`,
-> visual direction in `design/hybrid.html`. M2 results are in `CHANGELOG.md`.
-> Desktop ≥ 1024 px only; tablet/phone are Milestone 3. Do not start Milestone 3 or deploy without the owner's go-ahead.
+> **Status: Milestone 3 released as v0.3.0** (2026-10-31): phone and tablet. v0.1.0 = M1 (plan in
+> `docs/MILESTONE_1.md`, visual direction in `design/hybrid.html`), v0.2.0 = M2 desktop. Do not start Milestone 4 or
+> deploy without the owner's go-ahead.
 >
 > Before claiming work is done: `npm run check`, `npm test`, `npm run build`, `npm run budget -w apps/web`, `npm run e2e`.
 
@@ -28,6 +28,7 @@ to be served at **anushprabhu.com**.
 | Kali Linux theme | **Desktop by default, content underneath.** On desktop the home page opens the Kali-style desktop with the terminal and About windows snapped side by side. Every page is still a real HTML page that works without JavaScript; the desktop is layered on top. |
 | Design direction | Hybrid approved 2026-10-31 (`design/hybrid.html`, `docs/MILESTONE_1.md` §4): A's Xfce desktop and windows, B's Ctrl+K search launcher, C's phone layout. Red Hat Display/Text/Mono. Blue-slate surfaces, accent `#5B8DEF`. Signature element: the name shown as the output of a large Kali `whoami` prompt. |
 | Windows features | Only Windows 11 Snap Layouts (phased: menu + Snap Assist first; drag-to-snap, snap groups, resizing later). |
+| Screen sizes (M3) | **Desktop** ≥ 1024 px: full window manager. **Tablet** 600–1023 px wide and ≥ 500 px tall: same desktop island without the shortcut rail; windows open full-screen, no free dragging, two-up split via Snap Layouts (side by side in landscape, stacked top/bottom in portrait); tapping maximise opens the layout menu. **Phone** (< 600 px wide, or < 500 px tall): no window manager. Pages become full-screen "apps" with a Linux status bar, back bar and bottom dock; the home page is an app grid. Terminal, search and recent apps open as full-screen sheets whose JavaScript loads only when tapped. |
 | Existing React/Vite draft | **Port content, replace code.** Moved to `reference/vite-draft/` (git-ignored) at the start of M2; its `src/data/resume.js` is reference material only. |
 | Resume PDF | Public version must **not** include the phone number (redacted copy made in Milestone 5). The unredacted original lives in `reference/vite-draft/public/` and must never be committed or published. |
 | Repository | `github.com/Anush-Prabhu/anushprabhu.com` (renamed from `Anush-Prabhu.github.io`, so GitHub Pages never publishes it). Push as the `Anush-Prabhu` account per command: `GH_TOKEN=$(gh auth token --user Anush-Prabhu)`; the machine's default gh account is a different one. |

@@ -1,0 +1,37 @@
+---
+// Phone home screen: search and an app grid. Only shown in the phone layout (see .m-only in base.css).
+import { Icon } from '../desktop/Icon'
+import { profile } from '../../data/profile'
+
+const apps = [
+  { label: 'About', href: '/about', icon: 'user' },
+  { label: 'Experience', href: '/experience', icon: 'briefcase' },
+  { label: 'Projects', href: '/projects', icon: 'folder' },
+  { label: 'Research', href: '/research', icon: 'research' },
+  { label: 'Skills', href: '/skills', icon: 'award' },
+  { label: 'Contact', href: '/contact', icon: 'mail' },
+  { label: 'GitHub', href: profile.github, icon: 'github', external: true },
+  { label: 'LinkedIn', href: profile.linkedin, icon: 'linkedin', external: true },
+] as const
+---
+
+<div class="m-home m-only">
+  <button type="button" class="m-search js-only" data-m-open="search">
+    <Icon name="search" size={18} />
+    Search my work
+  </button>
+  <nav aria-label="Apps">
+    <ul class="m-grid">
+      {apps.map((a) => (
+        <li>
+          <a class="m-app" href={a.href} {...('external' in a ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+            <span class="tile">
+              <Icon name={a.icon} size={26} />
+            </span>
+            {a.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</div>

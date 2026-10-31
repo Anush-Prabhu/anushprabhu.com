@@ -15,6 +15,8 @@ export interface WindowProps {
   focused: boolean
   /** True while this window's Snap Layouts menu is open (highlights the maximise button). */
   snapOpen: boolean
+  /** Tablet mode: no dragging, and the maximise button opens the layout menu (which also has full-screen). */
+  tablet: boolean
   onFocus(): void
   onClose(): void
   onMinimize(): void
@@ -43,7 +45,7 @@ export function Window(p: WindowProps) {
   )
 
   const startDrag = (e: PointerEvent) => {
-    if (e.button !== 0 || (e.target as HTMLElement).closest('button')) return
+    if (p.tablet || e.button !== 0 || (e.target as HTMLElement).closest('button')) return
     e.preventDefault()
     p.onFocus()
     const el = e.currentTarget as HTMLElement
@@ -82,7 +84,7 @@ export function Window(p: WindowProps) {
       ArrowDown: [0, KEY_STEP],
     }
     const m = moves[e.key]
-    if (!m || e.altKey || e.ctrlKey || e.metaKey) return
+    if (!m || p.tablet || e.altKey || e.ctrlKey || e.metaKey) return
     e.preventDefault()
     p.onMove(win.bounds.x + m[0], win.bounds.y + m[1])
   }
@@ -113,7 +115,8 @@ export function Window(p: WindowProps) {
       longPressed.current = false
       return
     }
-    p.onToggleMaximize()
+    if (p.tablet && maxBtn.current) p.onSnapMenu(maxBtn.current, 'touch')
+    else p.onToggleMaximize()
   }
   const maxKey = (e: KeyboardEvent) => {
     if (e.key === 'ArrowDown' && maxBtn.current) {
@@ -156,7 +159,7 @@ export function Window(p: WindowProps) {
           tabIndex={0}
           role="button"
           aria-roledescription="window title"
-          aria-label={`${p.title}. Use arrow keys to move the window.`}
+          aria-label={p.tablet ? p.title : `${p.title}. Use arrow keys to move the window.`}
           onKeyDown={onTitleKey as never}
         >
           {p.title}
@@ -169,7 +172,11 @@ export function Window(p: WindowProps) {
             ref={maxBtn}
             type="button"
             class={p.snapOpen ? 'hot' : undefined}
-            aria-label={`${maximized ? 'Restore' : 'Maximise'} ${def.title}. Press down arrow for snap layouts.`}
+            aria-label={
+              p.tablet
+                ? `Layout and full screen for ${def.title}`
+                : `${maximized ? 'Restore' : 'Maximise'} ${def.title}. Press down arrow for snap layouts.`
+            }
             aria-haspopup="dialog"
             aria-expanded={p.snapOpen}
             onClick={maxClick}

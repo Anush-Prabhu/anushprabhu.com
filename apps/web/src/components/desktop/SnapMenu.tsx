@@ -8,6 +8,7 @@ import { Icon } from './Icon'
 const SUGGESTED: { layout: LayoutId; apps: AppId[]; label: string }[] = [
   { layout: 'halves', apps: ['terminal', 'about'], label: 'Terminal and About side by side' },
   { layout: 'main-stack', apps: ['projects', 'experience', 'contact'], label: 'Projects with Experience and Contact' },
+  { layout: 'stacked', apps: ['about', 'terminal'], label: 'About above Terminal' },
 ]
 
 export interface SnapMenuProps {
@@ -21,6 +22,9 @@ export interface SnapMenuProps {
   onClose(restoreFocus: boolean): void
   onPointerEnter(): void
   onPointerLeave(): void
+  /** Tablet: the menu replaces the maximise button, so it offers full screen too. */
+  showMaximize?: boolean
+  onToggleMaximize?(): void
 }
 
 export function SnapMenu(p: SnapMenuProps) {
@@ -38,7 +42,7 @@ export function SnapMenu(p: SnapMenuProps) {
   }, [p.anchor])
 
   useEffect(() => {
-    if (p.takeFocus) ref.current?.querySelector<HTMLButtonElement>('.z')?.focus()
+    if (p.takeFocus) ref.current?.querySelector<HTMLButtonElement>('.snap-full, .z')?.focus()
     const outside = (e: PointerEvent) => {
       if (!ref.current?.contains(e.target as Node) && !p.anchor.contains(e.target as Node)) p.onClose(false)
     }
@@ -47,7 +51,7 @@ export function SnapMenu(p: SnapMenuProps) {
   }, [])
 
   const onKey = (e: KeyboardEvent) => {
-    const zones = Array.from(ref.current?.querySelectorAll<HTMLButtonElement>('.z') ?? [])
+    const zones = Array.from(ref.current?.querySelectorAll<HTMLButtonElement>('.z, .snap-full') ?? [])
     const i = zones.indexOf(document.activeElement as HTMLButtonElement)
     if (e.key === 'Escape') {
       e.preventDefault()
@@ -79,6 +83,11 @@ export function SnapMenu(p: SnapMenuProps) {
         <strong>Snap layouts</strong>
         <span>for {title}</span>
       </div>
+      {p.showMaximize && (
+        <button type="button" class="snap-full" onClick={p.onToggleMaximize}>
+          {p.win.mode === 'maximized' ? 'Exit full screen' : 'Full screen'}
+        </button>
+      )}
       <div class="layouts">
         {pairs.length > 0 && <div class="grp">Suggested</div>}
         {pairs.map((s) => {
@@ -103,6 +112,7 @@ export function SnapMenu(p: SnapMenuProps) {
           )
         })}
         <div class="grp">Layouts</div>
+        {layouts.length === 0 && <p class="grp">No split layouts fit this screen.</p>}
         {layouts.map((layout) => (
           <div class={`layout l-${layout.id}`} role="group" aria-label={layout.label} key={layout.id}>
             {layout.zones.map((_, zi) => (
