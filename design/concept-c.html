@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Concept C — Modern Workspace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0d0f15;
+    --surface-1: #151822;
+    --surface-2: #1b1f2b;
+    --surface-3: #242938;
+    --border: #2a3042;
+    --border-strong: #3a4258;
+    --text-1: #e8eaf2;
+    --text-2: #aab0c2;
+    --text-3: #7e8598;
+    --accent: #9d8cff;
+    --accent-weak: rgb(157 140 255 / 0.15);
+    --ok: #63c08a;
+    --term-bg: #0a0c11;
+    --ui: 'Manrope', system-ui, sans-serif;
+    --mono: 'Fira Code', ui-monospace, monospace;
+    --r: 12px;
+    --gap: 12px;
+    --panel-h: 36px;
+    --dock-h: 74px;
+    --shadow: 0 18px 40px rgb(0 0 0 / .45);
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--text-1); font: 15px/24px var(--ui); overflow: hidden; -webkit-font-smoothing: antialiased; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  svg.i { width: 18px; height: 18px; flex: none; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+  .desktop {
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(60% 50% at 85% 90%, rgb(157 140 255 / .07), transparent 70%),
+      radial-gradient(50% 40% at 10% 10%, rgb(99 192 138 / .04), transparent 70%),
+      var(--bg);
+  }
+
+  /* ---------- Floating panel ---------- */
+  .panel {
+    position: absolute; top: 6px; left: 8px; right: 8px; height: var(--panel-h); z-index: 50;
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 6px;
+    background: rgb(21 24 34 / .92); border: 1px solid var(--border); border-radius: 10px; font-size: 13.5px; font-weight: 600;
+  }
+  .pl, .pr { display: flex; align-items: center; gap: 2px; }
+  .pr { justify-content: flex-end; }
+  .pbtn { height: 28px; padding: 0 10px; border-radius: 7px; display: inline-flex; align-items: center; gap: 8px; color: var(--text-2); }
+  .pbtn:hover, .pbtn.on { background: var(--surface-3); color: var(--text-1); }
+  .pbtn.act { color: var(--text-1); }
+  .pbtn.act .dots { display: grid; grid-template-columns: repeat(2, 5px); gap: 2px; }
+  .pbtn.act .dots i { width: 5px; height: 5px; border-radius: 1.5px; background: var(--accent); }
+  .pclock { font-variant-numeric: tabular-nums; color: var(--text-1); padding: 0 12px; }
+  .pstat { display: inline-flex; align-items: center; gap: 6px; color: var(--text-3); font-size: 12.5px; padding: 0 8px; font-weight: 500; }
+  .pstat i { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); }
+
+  /* ---------- Drop-down terminal ---------- */
+  .dropterm {
+    position: absolute; z-index: 20; top: calc(6px + var(--panel-h) + 6px); left: 8px; right: 8px; height: 38%;
+    display: flex; flex-direction: column; background: var(--term-bg);
+    border: 1px solid var(--border); border-radius: 0 0 var(--r) var(--r); box-shadow: var(--shadow); overflow: hidden;
+  }
+  .dt-head { height: 30px; flex: none; display: flex; align-items: center; gap: 10px; padding: 0 8px 0 14px; background: var(--surface-1); border-bottom: 1px solid var(--border); font-size: 12.5px; color: var(--text-2); font-weight: 600; }
+  .dt-head .tabs { display: flex; gap: 4px; flex: 1; }
+  .dt-head .tab { padding: 3px 10px; border-radius: 6px; }
+  .dt-head .tab.on { background: var(--surface-3); color: var(--text-1); }
+  .dt-head kbd { font: 500 11px var(--mono); border: 1px solid var(--border-strong); border-radius: 4px; padding: 0 5px; color: var(--text-3); }
+  .dt-body { flex: 1; overflow: auto; padding: 12px 16px; font: 13.5px/21px var(--mono); color: #d3d7e3; }
+  .u { color: var(--ok); }
+  .h { color: var(--accent); }
+  .dim { color: var(--text-3); }
+  .hi { color: var(--text-1); }
+  .out { margin: 1px 0 10px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 10px; }
+  .chip { font: 500 12.5px/1 var(--mono); padding: 8px 12px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border-strong); }
+  .chip:hover { border-color: var(--accent); background: var(--accent-weak); }
+  .cursor { display: inline-block; width: 8px; height: 16px; background: var(--accent); vertical-align: -3px; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .cursor { animation: none; } }
+  .grip { height: 6px; flex: none; display: grid; place-items: center; background: var(--surface-1); }
+  .grip::after { content: ''; width: 40px; height: 3px; border-radius: 2px; background: var(--border-strong); }
+
+  /* ---------- Profile window ---------- */
+  .win {
+    position: absolute; z-index: 10; display: flex; flex-direction: column; overflow: hidden;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r); box-shadow: var(--shadow);
+  }
+  .win.profile { left: 8%; right: 8%; top: calc(38% + 62px); bottom: calc(var(--dock-h) + 22px); }
+  @media (min-width: 1440px) { .win.profile { left: 14%; right: 14%; } }
+  .tbar { height: 40px; flex: none; display: flex; align-items: center; gap: 10px; padding: 0 8px 0 16px; font-size: 13.5px; font-weight: 700; color: var(--text-2); }
+  .tbar .title { flex: 1; }
+  .ctl { display: flex; gap: 6px; }
+  .ctl button { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-3); color: var(--text-2); }
+  .ctl button:hover { color: var(--text-1); background: var(--border-strong); }
+  .ctl svg { width: 14px; height: 14px; }
+  .pbody { flex: 1; overflow: auto; padding: 8px 34px 30px; display: grid; grid-template-columns: 1.35fr 1fr; gap: 34px; }
+  .ph-tag { display: inline-block; font: 600 10.5px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); border: 1px dashed var(--border-strong); padding: 4px 7px; border-radius: 5px; margin-bottom: 12px; }
+  .name { font-size: 40px; line-height: 46px; font-weight: 800; letter-spacing: -.02em; }
+  .role { margin-top: 4px; font-size: 19px; line-height: 28px; font-weight: 600; color: var(--accent); }
+  .summary { margin-top: 14px; color: var(--text-2); max-width: 56ch; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+  .btn { height: 42px; padding: 0 18px; border-radius: 999px; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; background: var(--surface-3); border: 1px solid var(--border-strong); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #12101f; }
+  .btn:hover { filter: brightness(1.08); }
+  .side h3 { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); margin: 6px 0 10px; }
+  .card { padding: 12px 14px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--border); margin-bottom: 8px; }
+  .card b { display: block; font-size: 14px; line-height: 20px; }
+  .card span { font-size: 13.5px; line-height: 20px; color: var(--text-2); }
+
+  /* ---------- Dock ---------- */
+  .dock {
+    position: absolute; z-index: 30; left: 50%; bottom: 12px; transform: translateX(-50%); height: var(--dock-h);
+    display: flex; align-items: center; gap: 6px; padding: 0 10px;
+    background: rgb(21 24 34 / .94); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow);
+  }
+  .dapp { width: 72px; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; line-height: 13px; font-weight: 600; color: var(--text-2); }
+  .dapp .ic { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: var(--surface-3); color: var(--text-1); position: relative; }
+  .dapp .ic svg { width: 22px; height: 22px; }
+  .dapp.run .ic::after { content: ''; position: absolute; bottom: -6px; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+  .dapp:hover .ic { background: var(--accent-weak); color: var(--accent); }
+  .dsep { width: 1px; height: 40px; background: var(--border); }
+
+  /* ---------- Snap ---------- */
+  .snap { position: absolute; z-index: 60; top: calc(38% + 106px); right: calc(8% + 4px); width: 300px; padding: 12px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--border-strong); box-shadow: var(--shadow); display: none; }
+  @media (min-width: 1440px) { .snap { right: calc(14% + 4px); } }
+  body[data-state='snap'] .snap { display: block; }
+  .snap-head { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: var(--text-3); margin-bottom: 10px; }
+  .layouts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .lbl { grid-column: span 2; font-size: 11px; font-weight: 700; color: var(--text-3); letter-spacing: .08em; text-transform: uppercase; }
+  .layout { height: 72px; padding: 5px; border-radius: 9px; background: var(--surface-1); border: 1px solid var(--border); display: grid; gap: 4px; }
+  .layout .z { border-radius: 5px; background: var(--surface-3); display: grid; place-items: center; color: var(--text-2); border: 1px solid transparent; }
+  .layout .z svg { width: 16px; height: 16px; }
+  .layout .z:hover, .layout .z.focus { background: var(--accent-weak); border-color: var(--accent); color: var(--text-1); }
+  .l-halves { grid-template-columns: 1fr 1fr; }
+  .l-23 { grid-template-columns: 2fr 1fr; }
+  .l-stack { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+  .l-stack .z:first-child { grid-row: span 2; }
+  .l-quad { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+
+  /* ---------- Launcher: app grid overview ---------- */
+  .overview { position: absolute; inset: 0; z-index: 70; display: none; flex-direction: column; align-items: center; padding-top: 90px; background: rgb(10 12 17 / .9); }
+  body[data-state='launcher'] .overview { display: flex; }
+  .ov-search { width: min(520px, calc(100vw - 32px)); height: 46px; display: flex; align-items: center; gap: 10px; padding: 0 18px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--accent); color: var(--text-3); font-weight: 500; }
+  .ov-grid { margin-top: 44px; display: grid; grid-template-columns: repeat(5, 120px); gap: 26px 18px; }
+  .ov-app { display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 600; color: var(--text-1); text-align: center; }
+  .ov-app .ic { width: 72px; height: 72px; border-radius: 20px; display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--border); color: var(--accent); }
+  .ov-app .ic svg { width: 32px; height: 32px; }
+  .ov-app span { font-size: 12px; font-weight: 500; color: var(--text-3); margin-top: -8px; }
+  .ov-app:hover .ic { background: var(--accent-weak); border-color: var(--accent); }
+
+  /* ---------- Tablet ---------- */
+  @media (max-width: 1023px) {
+    .dropterm { height: 34%; }
+    .win.profile { left: 8px; right: 8px; top: calc(34% + 60px); }
+    .pbody { grid-template-columns: 1fr; padding: 8px 22px 24px; gap: 10px; }
+    .pclock { display: none; }
+    .dapp { width: 58px; font-size: 10.5px; }
+    .snap { right: 12px; top: calc(34% + 104px); }
+    .ov-grid { grid-template-columns: repeat(4, 120px); }
+  }
+
+  /* ---------- Phone ---------- */
+  .phone { display: none; }
+  @media (max-width: 599px) {
+    .desktop { display: none; }
+    .phone { display: block; position: fixed; inset: 0; background: radial-gradient(70% 40% at 80% 0%, rgb(157 140 255 / .12), transparent 70%), var(--bg); }
+    .m-top { height: 40px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; font-size: 13.5px; font-weight: 700; }
+    .m-home { padding: 18px 18px 0; }
+    .m-hello { font: 500 12.5px var(--mono); color: var(--text-3); }
+    .m-home .name { font-size: 32px; line-height: 38px; margin-top: 8px; }
+    .m-home .role { font-size: 17px; line-height: 24px; }
+    .m-search { margin-top: 20px; height: 46px; display: flex; align-items: center; gap: 10px; padding: 0 16px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-3); font-weight: 500; }
+    .m-grid { margin-top: 22px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px 6px; }
+    .m-app { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text-2); }
+    .m-app .ic { width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--border); color: var(--accent); }
+    .m-app .ic svg { width: 26px; height: 26px; }
+    .m-dock { position: absolute; left: 14px; right: 14px; bottom: 26px; height: 70px; border-radius: 22px; background: rgb(27 31 43 / .95); border: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; }
+    .m-dock .m-app .ic { width: 50px; height: 50px; background: var(--surface-3); color: var(--text-1); }
+    .m-dock .m-app > span:not(.ic) { display: none; }
+    .m-gesture { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 120px; height: 4px; border-radius: 2px; background: var(--text-3); }
+    .m-view, .m-switch { display: none; position: absolute; inset: 40px 0 0 0; background: var(--surface-1); border-radius: 20px 20px 0 0; flex-direction: column; }
+    body[data-state='app'] .m-view { display: flex; }
+    body[data-state='switch'] .m-switch { display: flex; background: rgb(10 12 17 / .97); }
+    .m-view .hdr { height: 56px; display: flex; align-items: center; gap: 4px; padding: 0 6px; font-size: 17px; font-weight: 800; }
+    .m-view .hdr button { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: var(--text-2); }
+    .m-view .hdr .sp { flex: 1; }
+    .m-view .body { padding: 6px 18px 40px; overflow: auto; }
+    .m-view .name { font-size: 32px; line-height: 38px; }
+    .m-switch { padding: 24px 18px; }
+    .m-switch h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 16px; }
+    .m-thumbs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .thumb { height: 230px; border-radius: 16px; overflow: hidden; background: var(--surface-1); border: 1px solid var(--border-strong); display: flex; flex-direction: column; text-align: left; }
+    .thumb .th { height: 36px; display: flex; align-items: center; gap: 8px; padding: 0 12px; font-size: 13px; font-weight: 700; background: var(--surface-2); }
+    .thumb .tb { flex: 1; padding: 10px 12px; font-size: 11.5px; line-height: 16px; color: var(--text-2); }
+    .thumb .tb.mono { font-family: var(--mono); background: var(--term-bg); }
+    .thumb.cur { border-color: var(--accent); }
+  }
+
+  .statebar { position: fixed; z-index: 100; left: 50%; bottom: 100px; transform: translateX(-50%); display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #f4f1e8; color: #222; font: 600 12px/1 system-ui, sans-serif; box-shadow: 0 6px 20px rgb(0 0 0 / .4); white-space: nowrap; }
+  .statebar span { padding: 8px 10px; color: #777; }
+  .statebar button { padding: 8px 12px; border-radius: 999px; color: #222; }
+  .statebar button:hover { background: #e3ddcc; }
+  body.no-bar .statebar { display: none; }
+  @media (max-width: 599px) { .statebar { bottom: 106px; } .statebar .dk { display: none; } }
+  @media (min-width: 600px) { .statebar .ph { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="desktop">
+  <nav class="panel" aria-label="Top panel">
+    <div class="pl">
+      <button class="pbtn act" data-set-state="launcher" aria-label="Show apps"><span class="dots"><i></i><i></i><i></i><i></i></span>Apps</button>
+      <button class="pbtn on" aria-label="Toggle terminal"><svg class="i"><use href="icons.svg#terminal"/></svg>Terminal</button>
+    </div>
+    <span class="pclock" data-clock="full">Sat, Oct 31  16:45</span>
+    <div class="pr">
+      <span class="pstat" title="Ask Anush service status (from Milestone 6)"><i></i>Ask Anush</span>
+      <button class="pbtn" aria-label="GitHub"><svg class="i"><use href="icons.svg#github"/></svg></button>
+      <button class="pbtn" aria-label="LinkedIn"><svg class="i"><use href="icons.svg#linkedin"/></svg></button>
+      <button class="pbtn" aria-label="Session menu"><svg class="i"><use href="icons.svg#power"/></svg></button>
+    </div>
+  </nav>
+
+  <section class="dropterm" aria-label="Terminal">
+    <div class="dt-head"><div class="tabs"><span class="tab on">anush@portfolio:~</span><span class="tab">+</span></div><span>hide <kbd>`</kbd></span></div>
+    <div class="dt-body">
+      <div><span class="u">anush@portfolio</span>:<span class="h">~</span>$ whoami</div>
+      <div class="out"><span class="hi">Anush Prabhu</span> — security engineer · automation · applied AI · Johns Hopkins MSSI '26</div>
+      <div class="dim">Tap a command below, or type your own. Press ` any time to hide this console.</div>
+      <div class="chips"><button class="chip">experience</button><button class="chip">projects</button><button class="chip">skills</button><button class="chip">research</button><button class="chip">contact</button><button class="chip">ask "why security?"</button></div>
+      <div><span class="u">anush@portfolio</span>:<span class="h">~</span>$ <span class="cursor"></span></div>
+    </div>
+    <div class="grip"></div>
+  </section>
+
+  <section class="win profile" aria-label="About">
+    <header class="tbar"><svg class="i"><use href="icons.svg#user"/></svg><span class="title">About</span>
+      <div class="ctl"><button aria-label="Minimize"><svg><use href="icons.svg#min"/></svg></button><button data-set-state="snap" aria-label="Maximize (hover for Snap Layouts)"><svg><use href="icons.svg#max"/></svg></button><button aria-label="Close"><svg><use href="icons.svg#close"/></svg></button></div>
+    </header>
+    <div class="pbody">
+      <div>
+        <span class="ph-tag">Placeholder copy · from resume</span>
+        <h1 class="name">Anush Prabhu</h1>
+        <div class="role">I build secure systems and the automation behind them.</div>
+        <p class="summary">Security engineer working across detection engineering, identity automation and applied AI. MS Security Informatics at Johns Hopkins (May 2026), based in Baltimore.</p>
+        <div class="actions">
+          <button class="btn primary"><svg class="i"><use href="icons.svg#download"/></svg>Resume</button>
+          <button class="btn"><svg class="i"><use href="icons.svg#mail"/></svg>Get in touch</button>
+          <button class="btn"><svg class="i"><use href="icons.svg#chat"/></svg>Ask Anush</button>
+        </div>
+      </div>
+      <div class="side">
+        <h3>Recent work</h3>
+        <div class="card"><b>Bank of America</b><span>gMSA lifecycle automation — provisioning from days to hours.</span></div>
+        <div class="card"><b>Jio Platforms</b><span>Cisco ASA/FTD anomaly scanner for SOC triage.</span></div>
+        <div class="card"><b>Johns Hopkins</b><span>Guardrailed RAG with grounded retrieval and safe fallbacks.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="dock" aria-label="Apps">
+    <button class="dapp run"><span class="ic"><svg><use href="icons.svg#user"/></svg></span>About</button>
+    <button class="dapp"><span class="ic"><svg><use href="icons.svg#briefcase"/></svg></span>Experience</button>
+    <button class="dapp"><span class="ic"><svg><use href="icons.svg#folder"/></svg></span>Projects</button>
+    <button class="dapp"><span class="ic"><svg><use href="icons.svg#research"/></svg></span>Research</button>
+    <button class="dapp"><span class="ic"><svg><use href="icons.svg#award"/></svg></span>Skills</button>
+    <button class="dapp"><span class="ic"><svg><use href="icons.svg#mail"/></svg></span>Contact</button>
+    <button class="dapp"><span class="ic"><svg><use href="icons.svg#file"/></svg></span>Resume</button>
+    <span class="dsep"></span>
+    <button class="dapp run"><span class="ic"><svg><use href="icons.svg#terminal"/></svg></span>Terminal</button>
+    <button class="dapp"><span class="ic"><svg><use href="icons.svg#chat"/></svg></span>Ask</button>
+  </nav>
+
+  <div class="snap" role="dialog" aria-label="Snap layouts">
+    <div class="snap-head"><span>Snap layouts</span><span>Arrows · Esc</span></div>
+    <div class="layouts">
+      <div class="lbl">Suggested</div>
+      <div class="layout l-halves"><button class="z" aria-label="Terminal left"><svg><use href="icons.svg#terminal"/></svg></button><button class="z" aria-label="About right"><svg><use href="icons.svg#user"/></svg></button></div>
+      <div class="layout l-stack"><button class="z" aria-label="Projects"><svg><use href="icons.svg#folder"/></svg></button><button class="z" aria-label="Ask Anush"><svg><use href="icons.svg#chat"/></svg></button><button class="z" aria-label="Contact"><svg><use href="icons.svg#mail"/></svg></button></div>
+      <div class="lbl">Layouts</div>
+      <div class="layout l-halves"><button class="z" aria-label="Left"></button><button class="z" aria-label="Right"></button></div>
+      <div class="layout l-23"><button class="z" aria-label="Two thirds"></button><button class="z focus" aria-label="One third"></button></div>
+      <div class="layout l-stack"><button class="z" aria-label="Main"></button><button class="z" aria-label="Top"></button><button class="z" aria-label="Bottom"></button></div>
+      <div class="layout l-quad"><button class="z" aria-label="Q1"></button><button class="z" aria-label="Q2"></button><button class="z" aria-label="Q3"></button><button class="z" aria-label="Q4"></button></div>
+    </div>
+  </div>
+
+  <div class="overview" role="dialog" aria-label="Apps">
+    <div class="ov-search"><svg class="i"><use href="icons.svg#search"/></svg>Search apps, skills, companies…</div>
+    <div class="ov-grid">
+      <button class="ov-app"><span class="ic"><svg><use href="icons.svg#user"/></svg></span>About<span>Who I am</span></button>
+      <button class="ov-app"><span class="ic"><svg><use href="icons.svg#briefcase"/></svg></span>Experience<span>5 roles</span></button>
+      <button class="ov-app"><span class="ic"><svg><use href="icons.svg#folder"/></svg></span>Projects<span>7 builds</span></button>
+      <button class="ov-app"><span class="ic"><svg><use href="icons.svg#research"/></svg></span>Research<span>1 publication</span></button>
+      <button class="ov-app"><span class="ic"><svg><use href="icons.svg#award"/></svg></span>Skills<span>& 7 certs</span></button>
+      <button class="ov-app"><span class="ic"><svg><use href="icons.svg#mail"/></svg></span>Contact<span>Say hello</span></button>
+      <button class="ov-app"><span class="ic"><svg><use href="icons.svg#file"/></svg></span>Resume<span>PDF</span></button>
+      <button class="ov-app"><span class="ic"><svg><use href="icons.svg#terminal"/></svg></span>Terminal<span>Type commands</span></button>
+      <button class="ov-app"><span class="ic"><svg><use href="icons.svg#chat"/></svg></span>Ask Anush<span>Chat</span></button>
+      <button class="ov-app"><span class="ic"><svg><use href="icons.svg#github"/></svg></span>GitHub<span>Code</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PHONE ================= -->
+<div class="phone">
+  <div class="m-top"><span data-clock="short">16:45</span><span>anush@portfolio</span></div>
+  <div class="m-home">
+    <div class="m-hello">anush@portfolio:~$ whoami</div>
+    <h1 class="name">Anush Prabhu</h1>
+    <div class="role">I build secure systems and the automation behind them.</div>
+    <div class="m-search"><svg class="i"><use href="icons.svg#search"/></svg>Search or ask…</div>
+    <div class="m-grid">
+      <button class="m-app" data-set-state="app"><span class="ic"><svg><use href="icons.svg#user"/></svg></span>About</button>
+      <button class="m-app"><span class="ic"><svg><use href="icons.svg#briefcase"/></svg></span>Experience</button>
+      <button class="m-app"><span class="ic"><svg><use href="icons.svg#folder"/></svg></span>Projects</button>
+      <button class="m-app"><span class="ic"><svg><use href="icons.svg#research"/></svg></span>Research</button>
+      <button class="m-app"><span class="ic"><svg><use href="icons.svg#award"/></svg></span>Skills</button>
+      <button class="m-app"><span class="ic"><svg><use href="icons.svg#mail"/></svg></span>Contact</button>
+      <button class="m-app"><span class="ic"><svg><use href="icons.svg#file"/></svg></span>Resume</button>
+      <button class="m-app"><span class="ic"><svg><use href="icons.svg#github"/></svg></span>GitHub</button>
+    </div>
+  </div>
+  <div class="m-dock">
+    <button class="m-app"><span class="ic"><svg><use href="icons.svg#terminal"/></svg></span><span>Terminal</span></button>
+    <button class="m-app"><span class="ic"><svg><use href="icons.svg#chat"/></svg></span><span>Ask</span></button>
+    <button class="m-app" data-set-state="switch"><span class="ic"><svg><use href="icons.svg#cards"/></svg></span><span>Apps</span></button>
+  </div>
+  <div class="m-gesture"></div>
+
+  <div class="m-view">
+    <div class="hdr"><button data-set-state="app" aria-label="Back"><svg class="i"><use href="icons.svg#back"/></svg></button>About<span class="sp"></span><button data-set-state="switch" aria-label="Open apps"><svg class="i"><use href="icons.svg#cards"/></svg></button></div>
+    <div class="body">
+      <span class="ph-tag">Placeholder copy</span>
+      <h1 class="name">Anush Prabhu</h1>
+      <div class="role">I build secure systems and the automation behind them.</div>
+      <p class="summary">Security engineer working across detection engineering, identity automation and applied AI.</p>
+      <div class="actions"><button class="btn primary"><svg class="i"><use href="icons.svg#download"/></svg>Resume</button><button class="btn"><svg class="i"><use href="icons.svg#mail"/></svg>Get in touch</button></div>
+      <div class="side" style="margin-top:22px"><h3>Recent work</h3>
+        <div class="card"><b>Bank of America</b><span>gMSA lifecycle automation.</span></div>
+        <div class="card"><b>Jio Platforms</b><span>Cisco ASA/FTD anomaly scanner.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="m-switch">
+    <h2>Open apps</h2>
+    <div class="m-thumbs">
+      <button class="thumb cur"><span class="th"><svg class="i"><use href="icons.svg#user"/></svg>About</span><span class="tb"><b style="color:var(--text-1);font-size:15px">Anush Prabhu</b><br>I build secure systems…</span></button>
+      <button class="thumb"><span class="th"><svg class="i"><use href="icons.svg#terminal"/></svg>Terminal</span><span class="tb mono">$ whoami<br>Anush Prabhu — security engineer…</span></button>
+      <button class="thumb"><span class="th"><svg class="i"><use href="icons.svg#chat"/></svg>Ask Anush</span><span class="tb">What did you build at Jio?</span></button>
+    </div>
+  </div>
+</div>
+
+<div class="statebar" aria-label="Mockup states">
+  <span>Concept C</span>
+  <button class="dk" data-set-state="launcher">Launcher</button>
+  <button class="dk" data-set-state="snap">Snap menu</button>
+  <button class="ph" data-set-state="app">App open</button>
+  <button class="ph" data-set-state="switch">App switcher</button>
+</div>
+<script src="mockup.js"></script>
+</body>
+</html>

@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Concept B — Tiling Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0d0f11;
+    --surface-1: #121518;
+    --surface-2: #171b1f;
+    --surface-3: #1f2429;
+    --border: #262c32;
+    --border-strong: #38414a;
+    --text-1: #e4e7e9;
+    --text-2: #a8b0b6;
+    --text-3: #7b858d;
+    --accent: #7fb8a4;
+    --accent-weak: rgb(127 184 164 / 0.14);
+    --warn: #d9a13b;
+    --term-bg: #0b0d0f;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --serif: 'Source Serif 4', Georgia, serif;
+    --gap: 10px;
+    --bar-h: 30px;
+    --r: 3px;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--text-1); font: 13px/20px var(--mono); overflow: hidden; -webkit-font-smoothing: antialiased; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  svg.i { width: 16px; height: 16px; flex: none; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .desktop { position: fixed; inset: 0; }
+
+  /* ---------- Status bar ---------- */
+  .bar {
+    position: absolute; inset: 0 0 auto 0; height: var(--bar-h); z-index: 50;
+    display: flex; align-items: stretch; background: var(--surface-1); border-bottom: 1px solid var(--border); font-size: 12.5px;
+  }
+  .bar .launch { display: flex; align-items: center; gap: 8px; padding: 0 12px; background: var(--accent); color: #0b0d0f; font-weight: 600; }
+  .bar .launch kbd { font: 500 11px var(--mono); opacity: .7; }
+  .tags { display: flex; }
+  .tag { display: flex; align-items: center; gap: 6px; padding: 0 11px; color: var(--text-2); border-right: 1px solid var(--border); }
+  .tag:hover { background: var(--surface-2); color: var(--text-1); }
+  .tag.open { color: var(--text-1); }
+  .tag.open::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--text-3); }
+  .tag.focused { background: var(--surface-3); box-shadow: inset 0 -2px var(--accent); }
+  .tag.focused::before { background: var(--accent); }
+  .bar .right { margin-left: auto; display: flex; align-items: center; }
+  .bar .seg { display: flex; align-items: center; gap: 6px; padding: 0 12px; color: var(--text-2); border-left: 1px solid var(--border); height: 100%; }
+  .bar .seg.ok b { color: var(--accent); font-weight: 500; }
+  .bar .seg.clock { color: var(--text-1); font-variant-numeric: tabular-nums; }
+
+  /* ---------- Tiles ---------- */
+  .tiles {
+    position: absolute; top: calc(var(--bar-h) + var(--gap)); right: var(--gap); bottom: var(--gap); left: var(--gap);
+    display: grid; gap: var(--gap);
+    grid-template-columns: 1fr 1fr; grid-template-rows: 1.75fr 1fr;
+    grid-template-areas: 'term profile' 'term log';
+  }
+  @media (min-width: 1440px) { .tiles { grid-template-columns: 1fr 1.05fr; } }
+  .win { display: flex; flex-direction: column; min-height: 0; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r); }
+  .win.focused { border-color: var(--accent); }
+  .win.term { grid-area: term; }
+  .win.profile { grid-area: profile; }
+  .win.log { grid-area: log; }
+  .tbar { height: 28px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 2px 0 10px; border-bottom: 1px solid var(--border); font-size: 12px; color: var(--text-3); }
+  .win.focused .tbar { color: var(--text-1); }
+  .tbar .title { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .tbar .title em { font-style: normal; color: var(--accent); }
+  .ctl { display: flex; }
+  .ctl button { width: 26px; height: 24px; display: grid; place-items: center; color: var(--text-3); border-radius: 2px; }
+  .ctl button:hover { background: var(--surface-3); color: var(--text-1); }
+  .ctl svg { width: 14px; height: 14px; }
+
+  /* ---------- Terminal ---------- */
+  .term .body { flex: 1; overflow: auto; padding: 12px 14px; background: var(--term-bg); font-size: 13px; line-height: 21px; color: #cdd3d7; }
+  .pr { color: var(--accent); }
+  .pr b { color: var(--text-1); font-weight: 600; }
+  .dim { color: var(--text-3); }
+  .hi { color: var(--text-1); }
+  .dir { color: #8fc7e8; }
+  .out { margin: 2px 0 12px; }
+  .ls { display: flex; flex-wrap: wrap; gap: 2px 20px; }
+  .cmds { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 6px; margin: 8px 0 14px; }
+  .cmd { display: flex; justify-content: space-between; gap: 8px; text-align: left; padding: 7px 10px; border: 1px solid var(--border-strong); border-radius: 2px; background: #101316; }
+  .cmd span { color: var(--text-3); }
+  .cmd:hover { border-color: var(--accent); background: var(--accent-weak); }
+  .cursor { display: inline-block; width: 8px; height: 16px; background: var(--accent); vertical-align: -3px; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .cursor { animation: none; } }
+
+  /* ---------- Profile ---------- */
+  .profile .body { flex: 1; overflow: auto; padding: 26px 30px; }
+  .ph-tag { display: inline-block; font-size: 10.5px; line-height: 1; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); border: 1px dashed var(--border-strong); padding: 4px 6px; margin-bottom: 16px; }
+  .kicker { font-size: 12px; color: var(--accent); letter-spacing: .04em; }
+  .name { font: 700 40px/44px var(--serif); letter-spacing: -.01em; margin-top: 6px; }
+  .role { font: 400 19px/28px var(--serif); color: var(--text-2); margin-top: 4px; font-style: italic; }
+  .summary { font: 400 16.5px/27px var(--serif); color: var(--text-1); margin-top: 16px; max-width: 58ch; }
+  .facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 18px; margin-top: 18px; font-size: 12.5px; }
+  .facts dt { color: var(--text-3); }
+  .facts dd { color: var(--text-2); }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+  .btn { height: 34px; padding: 0 14px; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border-strong); border-radius: 2px; font-size: 12.5px; font-weight: 500; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #0b0d0f; }
+  .btn:hover { filter: brightness(1.08); }
+
+  /* ---------- Log tile (multi-window arrangement) ---------- */
+  .log .body { flex: 1; overflow: auto; padding: 10px 14px; font-size: 12.5px; line-height: 22px; }
+  .row { display: grid; grid-template-columns: 112px 1fr; gap: 10px; padding: 2px 0; border-bottom: 1px dashed #1d2226; }
+  .row .when { color: var(--text-3); }
+  .row b { color: var(--text-1); font-weight: 500; }
+  .row span { color: var(--text-2); }
+
+  /* ---------- Snap Layouts ---------- */
+  .snap {
+    position: absolute; z-index: 60; top: calc(var(--bar-h) + var(--gap) + 30px); right: calc(var(--gap) + 6px); width: 290px;
+    padding: 10px; border: 1px solid var(--accent); border-radius: var(--r); background: var(--surface-2);
+    box-shadow: 0 10px 30px rgb(0 0 0 / .5); display: none;
+  }
+  body[data-state='snap'] .snap { display: block; }
+  .snap-head { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--text-3); margin-bottom: 8px; }
+  .layouts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .lbl { grid-column: span 2; font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: .08em; }
+  .layout { height: 66px; padding: 4px; border: 1px solid var(--border); border-radius: 2px; display: grid; gap: 3px; background: var(--surface-1); }
+  .layout .z { background: var(--surface-3); border: 1px solid #2c333a; border-radius: 1px; display: grid; place-items: center; color: var(--text-2); }
+  .layout .z svg { width: 15px; height: 15px; }
+  .layout .z:hover, .layout .z.focus { background: var(--accent-weak); border-color: var(--accent); color: var(--text-1); }
+  .l-halves { grid-template-columns: 1fr 1fr; }
+  .l-23 { grid-template-columns: 2fr 1fr; }
+  .l-stack { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+  .l-stack .z:first-child { grid-row: span 2; }
+  .l-quad { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+
+  /* ---------- Command palette launcher ---------- */
+  .palette-wrap { position: absolute; inset: 0; z-index: 70; background: rgb(8 10 12 / .6); display: none; align-items: flex-start; justify-content: center; padding-top: 14vh; }
+  body[data-state='launcher'] .palette-wrap { display: flex; }
+  .palette { width: min(620px, calc(100vw - 32px)); background: var(--surface-1); border: 1px solid var(--accent); border-radius: var(--r); box-shadow: 0 20px 60px rgb(0 0 0 / .6); }
+  .pal-in { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 15px; }
+  .pal-in .pr { font-weight: 600; }
+  .pal-in .typed { color: var(--text-1); }
+  .pal-list { padding: 6px; }
+  .pal-sec { padding: 8px 10px 4px; font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: .08em; }
+  .pal-item { width: 100%; display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; text-align: left; border-radius: 2px; }
+  .pal-item .d { color: var(--text-3); }
+  .pal-item kbd { font: 11px var(--mono); color: var(--text-3); border: 1px solid var(--border-strong); padding: 0 5px; border-radius: 2px; }
+  .pal-item.sel { background: var(--accent-weak); box-shadow: inset 2px 0 var(--accent); }
+  .pal-item mark { background: none; color: var(--accent); font-weight: 600; }
+  .pal-foot { display: flex; gap: 16px; padding: 8px 16px; border-top: 1px solid var(--border); font-size: 11.5px; color: var(--text-3); }
+
+  /* ---------- Tablet ---------- */
+  @media (max-width: 1023px) {
+    .tags .tag:not(.focused):not(.open) { display: none; }
+    .tiles { grid-template-columns: 1fr; grid-template-rows: 1.4fr 1fr; grid-template-areas: 'profile' 'term'; }
+    .win.log { display: none; }
+    .profile .body { padding: 22px; }
+    .name { font-size: 34px; line-height: 38px; }
+  }
+
+  /* ---------- Phone ---------- */
+  .phone { display: none; }
+  @media (max-width: 599px) {
+    .desktop { display: none; }
+    .phone { display: flex; flex-direction: column; position: fixed; inset: 0; background: var(--bg); }
+    .p-bar { height: 40px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; border-bottom: 1px solid var(--border); background: var(--surface-1); font-size: 12.5px; }
+    .p-bar b { color: var(--accent); font-weight: 600; }
+    .p-home { flex: 1; overflow: auto; padding: 22px 16px 120px; }
+    .p-home .name { font-size: 32px; line-height: 36px; }
+    .p-home .role { font-size: 17px; }
+    .p-run { margin-top: 22px; border: 1px solid var(--accent); border-radius: 2px; background: var(--surface-1); }
+    .p-run .pal-in { padding: 12px 14px; font-size: 14px; }
+    .p-run .pal-item { padding: 12px 12px; min-height: 48px; }
+    .p-dock { position: absolute; left: 0; right: 0; bottom: 0; height: 60px; display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--border); background: var(--surface-1); }
+    .p-dock button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; color: var(--text-2); }
+    .p-dock svg { width: 20px; height: 20px; }
+    .p-app, .p-switch { display: none; position: absolute; inset: 40px 0 0 0; background: var(--surface-1); flex-direction: column; }
+    body[data-state='app'] .p-app { display: flex; }
+    body[data-state='switch'] .p-switch { display: flex; background: var(--bg); }
+    .p-app .hdr { height: 48px; display: flex; align-items: center; gap: 4px; padding: 0 4px; border-bottom: 1px solid var(--accent); font-size: 13.5px; }
+    .p-app .hdr button { width: 44px; height: 44px; display: grid; place-items: center; color: var(--text-2); }
+    .p-app .hdr .sp { flex: 1; }
+    .p-app .body { padding: 20px 16px 40px; overflow: auto; }
+    .p-app .name { font-size: 32px; line-height: 36px; }
+    .p-switch .hdr { padding: 16px; font-size: 12px; color: var(--text-3); text-transform: uppercase; letter-spacing: .08em; }
+    .p-switch .item { display: grid; grid-template-columns: 28px 1fr auto; gap: 12px; align-items: center; padding: 14px 16px; min-height: 56px; border-bottom: 1px solid var(--border); text-align: left; }
+    .p-switch .item.cur { box-shadow: inset 3px 0 var(--accent); background: var(--surface-1); }
+    .p-switch .item span { color: var(--text-3); font-size: 12px; }
+  }
+
+  /* ---------- Mockup state bar ---------- */
+  .statebar { position: fixed; z-index: 100; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #f4f1e8; color: #222; font: 600 12px/1 system-ui, sans-serif; box-shadow: 0 6px 20px rgb(0 0 0 / .4); white-space: nowrap; }
+  .statebar span { padding: 8px 10px; color: #777; }
+  .statebar button { padding: 8px 12px; border-radius: 999px; color: #222; }
+  .statebar button:hover { background: #e3ddcc; }
+  body.no-bar .statebar { display: none; }
+  @media (max-width: 599px) { .statebar { bottom: 74px; } .statebar .dk { display: none; } }
+  @media (min-width: 600px) { .statebar .ph { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="desktop">
+  <nav class="bar" aria-label="Status bar">
+    <button class="launch" data-set-state="launcher"><svg class="i"><use href="icons.svg#search"/></svg>run <kbd>Ctrl K</kbd></button>
+    <div class="tags" aria-label="Apps">
+      <button class="tag open">about</button>
+      <button class="tag">experience</button>
+      <button class="tag">projects</button>
+      <button class="tag">research</button>
+      <button class="tag">skills</button>
+      <button class="tag">contact</button>
+      <button class="tag">resume.pdf</button>
+      <button class="tag focused">terminal</button>
+    </div>
+    <div class="right">
+      <span class="seg ok" title="Ask Anush service status (from Milestone 6)">ask <b>online</b></span>
+      <button class="seg" aria-label="GitHub"><svg class="i"><use href="icons.svg#github"/></svg></button>
+      <button class="seg" aria-label="LinkedIn"><svg class="i"><use href="icons.svg#linkedin"/></svg></button>
+      <span class="seg clock" data-clock="full">Sat, Oct 31  16:45</span>
+    </div>
+  </nav>
+
+  <div class="tiles">
+    <section class="win term focused" aria-label="Terminal">
+      <header class="tbar"><span class="title"><em>●</em> terminal — anush@portfolio:~</span>
+        <div class="ctl"><button aria-label="Minimize"><svg><use href="icons.svg#min"/></svg></button><button aria-label="Maximize"><svg><use href="icons.svg#max"/></svg></button><button aria-label="Close"><svg><use href="icons.svg#close"/></svg></button></div>
+      </header>
+      <div class="body">
+        <div><span class="pr"><b>anush</b>@portfolio <span class="dir">~</span> ❯</span> whoami</div>
+        <div class="out"><span class="hi">Anush Prabhu</span> · security engineering, automation, applied AI<br><span class="dim">MS Security Informatics, Johns Hopkins University · Baltimore, MD</span></div>
+        <div><span class="pr"><b>anush</b>@portfolio <span class="dir">~</span> ❯</span> help --short</div>
+        <div class="out dim">Pick a command, or type one. Everything here is also in the windows →</div>
+        <div class="cmds">
+          <button class="cmd">experience <span>roles</span></button>
+          <button class="cmd">projects <span>builds</span></button>
+          <button class="cmd">skills <span>stack</span></button>
+          <button class="cmd">research <span>papers</span></button>
+          <button class="cmd">contact <span>email</span></button>
+          <button class="cmd">ask … <span>chat</span></button>
+        </div>
+        <div><span class="pr"><b>anush</b>@portfolio <span class="dir">~</span> ❯</span> ls projects</div>
+        <div class="out ls"><span class="dir">guardrailed-rag</span><span class="dir">asa-ftd-scanner</span><span class="dir">provenance-guard</span><span class="dir">aptrust</span><span class="dir">takemeter</span><span class="dir">ics-shield</span></div>
+        <div><span class="pr"><b>anush</b>@portfolio <span class="dir">~</span> ❯</span> <span class="cursor"></span></div>
+      </div>
+    </section>
+
+    <section class="win profile" aria-label="About">
+      <header class="tbar"><span class="title">about — Anush Prabhu</span>
+        <div class="ctl"><button aria-label="Minimize"><svg><use href="icons.svg#min"/></svg></button><button data-set-state="snap" aria-label="Maximize (hover for Snap Layouts)"><svg><use href="icons.svg#max"/></svg></button><button aria-label="Close"><svg><use href="icons.svg#close"/></svg></button></div>
+      </header>
+      <div class="body">
+        <span class="ph-tag">Placeholder copy · from resume</span>
+        <div class="kicker">// security engineer</div>
+        <h1 class="name">Anush Prabhu</h1>
+        <div class="role">Detection, identity automation and AI with guardrails.</div>
+        <p class="summary">I build security controls that hold up in production — detection pipelines, identity automation and AI systems that know when not to answer. Most recently at Johns Hopkins, Jio Platforms and Bank of America.</p>
+        <dl class="facts">
+          <dt>based</dt><dd>Baltimore, MD</dd>
+          <dt>studying</dt><dd>MS Security Informatics, Johns Hopkins (May 2026)</dd>
+          <dt>certs</dt><dd>CEH · CHFI · CCNA · CyberOps · DevNet</dd>
+        </dl>
+        <div class="actions">
+          <button class="btn primary"><svg class="i"><use href="icons.svg#download"/></svg>resume.pdf</button>
+          <button class="btn"><svg class="i"><use href="icons.svg#mail"/></svg>contact</button>
+          <button class="btn"><svg class="i"><use href="icons.svg#chat"/></svg>ask anush</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="win log" aria-label="Experience log">
+      <header class="tbar"><span class="title">experience.log — tail</span>
+        <div class="ctl"><button aria-label="Minimize"><svg><use href="icons.svg#min"/></svg></button><button aria-label="Maximize"><svg><use href="icons.svg#max"/></svg></button><button aria-label="Close"><svg><use href="icons.svg#close"/></svg></button></div>
+      </header>
+      <div class="body">
+        <div class="row"><span class="when">2025-09 → 12</span><div><b>Johns Hopkins Hospital</b> <span>· Compliance Analyst, data quality &amp; privacy</span></div></div>
+        <div class="row"><span class="when">2025-06 → 08</span><div><b>Jio Platforms</b> <span>· Security Analytics Intern, detection &amp; SIEM</span></div></div>
+        <div class="row"><span class="when">2024-09 → 25-05</span><div><b>Johns Hopkins Medicine</b> <span>· Research Assistant, applied AI</span></div></div>
+        <div class="row"><span class="when">2023-07 → 24-05</span><div><b>Bank of America</b> <span>· Quality Specialist, IAM automation</span></div></div>
+        <div class="row"><span class="when">2019-09 → 23-01</span><div><b>Prabhu Tech</b> <span>· Founder, web platforms</span></div></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="snap" role="dialog" aria-label="Snap layouts">
+    <div class="snap-head"><span>snap layouts</span><span>←↑→↓ · esc</span></div>
+    <div class="layouts">
+      <div class="lbl">suggested</div>
+      <div class="layout l-halves"><button class="z" aria-label="Terminal left"><svg><use href="icons.svg#terminal"/></svg></button><button class="z" aria-label="About right"><svg><use href="icons.svg#user"/></svg></button></div>
+      <div class="layout l-stack"><button class="z" aria-label="Projects main"><svg><use href="icons.svg#folder"/></svg></button><button class="z" aria-label="Ask Anush top"><svg><use href="icons.svg#chat"/></svg></button><button class="z" aria-label="Contact bottom"><svg><use href="icons.svg#mail"/></svg></button></div>
+      <div class="lbl">layouts</div>
+      <div class="layout l-halves"><button class="z" aria-label="Halves, left"></button><button class="z" aria-label="Halves, right"></button></div>
+      <div class="layout l-23"><button class="z focus" aria-label="Two thirds, left"></button><button class="z" aria-label="Two thirds, right"></button></div>
+      <div class="layout l-stack"><button class="z" aria-label="Main"></button><button class="z" aria-label="Top"></button><button class="z" aria-label="Bottom"></button></div>
+      <div class="layout l-quad"><button class="z" aria-label="Q1"></button><button class="z" aria-label="Q2"></button><button class="z" aria-label="Q3"></button><button class="z" aria-label="Q4"></button></div>
+    </div>
+  </div>
+
+  <div class="palette-wrap">
+    <div class="palette" role="dialog" aria-label="Run">
+      <div class="pal-in"><span class="pr">run ❯</span><span class="typed">kerb</span><span class="cursor"></span></div>
+      <div class="pal-list">
+        <div class="pal-sec">content</div>
+        <button class="pal-item sel"><svg class="i"><use href="icons.svg#briefcase"/></svg><span>Bank of America — <mark>Kerb</mark>eros &amp; gMSA automation <span class="d">· experience</span></span><kbd>↵</kbd></button>
+        <button class="pal-item"><svg class="i"><use href="icons.svg#award"/></svg><span>Skills — IAM, AD, <mark>Kerb</mark>eros <span class="d">· skills</span></span><kbd></kbd></button>
+        <div class="pal-sec">apps</div>
+        <button class="pal-item"><svg class="i"><use href="icons.svg#terminal"/></svg><span>Terminal <span class="d">· run "help"</span></span><kbd>`</kbd></button>
+        <button class="pal-item"><svg class="i"><use href="icons.svg#chat"/></svg><span>Ask Anush: “what did you do with <mark>Kerb</mark>eros?”</span><kbd></kbd></button>
+      </div>
+      <div class="pal-foot"><span>↑↓ select</span><span>↵ open</span><span>tab snap right</span><span>esc close</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PHONE ================= -->
+<div class="phone">
+  <div class="p-bar"><span><b>anush</b>@portfolio</span><span data-clock="short">16:45</span></div>
+  <div class="p-home">
+    <span class="ph-tag">Placeholder copy</span>
+    <div class="kicker">// security engineer</div>
+    <h1 class="name">Anush Prabhu</h1>
+    <div class="role">Detection, identity automation and AI with guardrails.</div>
+    <div class="p-run">
+      <div class="pal-in"><span class="pr">run ❯</span><span class="dim">search or pick…</span></div>
+      <button class="pal-item" data-set-state="app"><svg class="i"><use href="icons.svg#user"/></svg><span>about</span><kbd>›</kbd></button>
+      <button class="pal-item"><svg class="i"><use href="icons.svg#briefcase"/></svg><span>experience</span><kbd>›</kbd></button>
+      <button class="pal-item"><svg class="i"><use href="icons.svg#folder"/></svg><span>projects</span><kbd>›</kbd></button>
+      <button class="pal-item"><svg class="i"><use href="icons.svg#research"/></svg><span>research</span><kbd>›</kbd></button>
+      <button class="pal-item"><svg class="i"><use href="icons.svg#award"/></svg><span>skills &amp; certs</span><kbd>›</kbd></button>
+      <button class="pal-item"><svg class="i"><use href="icons.svg#mail"/></svg><span>contact</span><kbd>›</kbd></button>
+      <button class="pal-item"><svg class="i"><use href="icons.svg#file"/></svg><span>resume.pdf</span><kbd>↓</kbd></button>
+    </div>
+  </div>
+  <div class="p-dock">
+    <button><svg><use href="icons.svg#terminal"/></svg>terminal</button>
+    <button><svg><use href="icons.svg#chat"/></svg>ask</button>
+    <button data-set-state="switch"><svg><use href="icons.svg#cards"/></svg>open (3)</button>
+  </div>
+
+  <div class="p-app">
+    <div class="hdr"><button data-set-state="app" aria-label="Back"><svg class="i"><use href="icons.svg#back"/></svg></button>about<span class="sp"></span><button data-set-state="switch" aria-label="Open apps"><svg class="i"><use href="icons.svg#cards"/></svg></button></div>
+    <div class="body">
+      <span class="ph-tag">Placeholder copy</span>
+      <h1 class="name">Anush Prabhu</h1>
+      <div class="role">Detection, identity automation and AI with guardrails.</div>
+      <p class="summary">I build security controls that hold up in production — detection pipelines, identity automation and AI systems that know when not to answer.</p>
+      <dl class="facts"><dt>based</dt><dd>Baltimore, MD</dd><dt>studying</dt><dd>MS Security Informatics, JHU</dd></dl>
+      <div class="actions"><button class="btn primary"><svg class="i"><use href="icons.svg#download"/></svg>resume.pdf</button><button class="btn"><svg class="i"><use href="icons.svg#mail"/></svg>contact</button></div>
+    </div>
+  </div>
+
+  <div class="p-switch">
+    <div class="hdr">open apps</div>
+    <button class="item cur"><svg class="i"><use href="icons.svg#user"/></svg>about<span>now</span></button>
+    <button class="item"><svg class="i"><use href="icons.svg#terminal"/></svg>terminal<span>2 min</span></button>
+    <button class="item"><svg class="i"><use href="icons.svg#folder"/></svg>projects / guardrailed-rag<span>5 min</span></button>
+  </div>
+</div>
+
+<div class="statebar" aria-label="Mockup states">
+  <span>Concept B</span>
+  <button class="dk" data-set-state="launcher">Launcher</button>
+  <button class="dk" data-set-state="snap">Snap menu</button>
+  <button class="ph" data-set-state="app">App open</button>
+  <button class="ph" data-set-state="switch">App switcher</button>
+</div>
+<script src="mockup.js"></script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Milestone 1 — Interface Concepts</title>
+<style>
+  :root { --bg: #e9e6df; --ink: #1d1d1b; --muted: #6b6860; --line: #d3cfc5; --card: #f6f4ef; }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--bg); color: var(--ink); font: 15px/1.55 system-ui, -apple-system, 'Segoe UI', sans-serif; padding: 40px 32px 80px; }
+  header { max-width: 1400px; margin: 0 auto 36px; }
+  h1 { font-size: 30px; letter-spacing: -.01em; }
+  header p { color: var(--muted); max-width: 75ch; margin-top: 8px; }
+  section { max-width: 1400px; margin: 0 auto 56px; padding-top: 28px; border-top: 1px solid var(--line); }
+  .head { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  h2 { font-size: 22px; }
+  .head a { color: var(--ink); font-weight: 600; font-size: 14px; }
+  .head .tags { color: var(--muted); font-size: 14px; }
+  .desc { color: var(--muted); max-width: 90ch; margin: 6px 0 18px; }
+  .row { display: flex; gap: 22px; overflow-x: auto; padding-bottom: 10px; align-items: flex-start; }
+  figure { flex: none; }
+  figcaption { font-size: 12.5px; color: var(--muted); margin-top: 8px; font-weight: 600; }
+  .frame { overflow: hidden; border-radius: 8px; border: 1px solid #bdb8ac; background: #000; box-shadow: 0 8px 24px rgb(0 0 0 / .12); }
+  .frame iframe { border: 0; transform-origin: 0 0; display: block; }
+  /* desktop 1440x900 @ .5 */
+  .d { width: 720px; height: 450px; } .d iframe { width: 1440px; height: 900px; transform: scale(.5); }
+  /* tablet 768x1024 @ .44 */
+  .t { width: 338px; height: 451px; } .t iframe { width: 768px; height: 1024px; transform: scale(.44); }
+  /* phone 390x844 @ .534 */
+  .p { width: 208px; height: 451px; border-radius: 18px; } .p iframe { width: 390px; height: 844px; transform: scale(.534); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Milestone 1 · Interface concepts</h1>
+  <p>Three directions for anushprabhu.com. Each row shows the desktop landing (1440 px), the Snap Layouts menu and launcher, tablet (768 px) and phone (390 px). Click "open full size" to try the states yourself. Content is placeholder copy taken from the resume. Details and the recommended hybrid are in <code>docs/MILESTONE_1.md</code>.</p>
+</header>
+
+<section>
+  <div class="head"><h2>Hybrid (chosen direction)</h2><span class="tags">A's desktop and windows, B's search launcher, C's phone layout, Red Hat type family</span><a href="hybrid.html" target="_blank">open full size ↗</a></div>
+  <p class="desc">The name appears as the output of a Kali <code>whoami</code> prompt, drawn large in the About window. That is the one bold element; everything else stays quiet. The launcher is a search box that finds apps and content; phones get a home screen with search, an app grid and a dock.</p>
+  <div class="row">
+    <figure><div class="frame d"><iframe src="hybrid.html?bar=0" loading="lazy" title="Hybrid desktop"></iframe></div><figcaption>Desktop 1440 — default arrangement</figcaption></figure>
+    <figure><div class="frame d"><iframe src="hybrid.html?bar=0&s=snap" loading="lazy" title="Hybrid snap"></iframe></div><figcaption>Snap Layouts menu</figcaption></figure>
+    <figure><div class="frame d"><iframe src="hybrid.html?bar=0&s=launcher" loading="lazy" title="Hybrid launcher"></iframe></div><figcaption>Launcher, empty</figcaption></figure>
+    <figure><div class="frame d"><iframe src="hybrid.html?bar=0&s=search" loading="lazy" title="Hybrid search"></iframe></div><figcaption>Launcher, searching "kerb"</figcaption></figure>
+    <figure><div class="frame t"><iframe src="hybrid.html?bar=0" loading="lazy" title="Hybrid tablet"></iframe></div><figcaption>Tablet 768</figcaption></figure>
+    <figure><div class="frame p"><iframe src="hybrid.html?bar=0" loading="lazy" title="Hybrid phone"></iframe></div><figcaption>Phone home</figcaption></figure>
+    <figure><div class="frame p"><iframe src="hybrid.html?bar=0&s=app" loading="lazy" title="Hybrid phone app"></iframe></div><figcaption>Phone app</figcaption></figure>
+    <figure><div class="frame p"><iframe src="hybrid.html?bar=0&s=switch" loading="lazy" title="Hybrid phone switcher"></iframe></div><figcaption>Phone open apps</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <div class="head"><h2>A · Xfce Refined</h2><span class="tags">steel blue · IBM Plex Sans + JetBrains Mono · floating windows</span><a href="concept-a.html" target="_blank">open full size ↗</a></div>
+  <p class="desc">Closest to a real Kali/Xfce desktop. Shortcut rail on the left, terminal and profile snapped side by side, Whisker-style launcher from the panel.</p>
+  <div class="row">
+    <figure><div class="frame d"><iframe src="concept-a.html?bar=0" loading="lazy" title="A desktop"></iframe></div><figcaption>Desktop 1440 — default arrangement</figcaption></figure>
+    <figure><div class="frame d"><iframe src="concept-a.html?bar=0&s=snap" loading="lazy" title="A snap"></iframe></div><figcaption>Snap Layouts menu</figcaption></figure>
+    <figure><div class="frame d"><iframe src="concept-a.html?bar=0&s=launcher" loading="lazy" title="A launcher"></iframe></div><figcaption>Launcher</figcaption></figure>
+    <figure><div class="frame t"><iframe src="concept-a.html?bar=0" loading="lazy" title="A tablet"></iframe></div><figcaption>Tablet 768</figcaption></figure>
+    <figure><div class="frame p"><iframe src="concept-a.html?bar=0" loading="lazy" title="A phone"></iframe></div><figcaption>Phone home</figcaption></figure>
+    <figure><div class="frame p"><iframe src="concept-a.html?bar=0&s=app" loading="lazy" title="A phone app"></iframe></div><figcaption>Phone app</figcaption></figure>
+    <figure><div class="frame p"><iframe src="concept-a.html?bar=0&s=switch" loading="lazy" title="A phone switcher"></iframe></div><figcaption>Phone switcher</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <div class="head"><h2>B · Tiling Console</h2><span class="tags">sage · IBM Plex Mono + Source Serif 4 · tiled windows</span><a href="concept-b.html" target="_blank">open full size ↗</a></div>
+  <p class="desc">Tiling-window-manager feel: windows tile with even gaps from the start (terminal, profile, experience log). Apps live as text tabs in the status bar; the launcher is a centred command palette that also searches content.</p>
+  <div class="row">
+    <figure><div class="frame d"><iframe src="concept-b.html?bar=0" loading="lazy" title="B desktop"></iframe></div><figcaption>Desktop 1440 — three tiles</figcaption></figure>
+    <figure><div class="frame d"><iframe src="concept-b.html?bar=0&s=snap" loading="lazy" title="B snap"></iframe></div><figcaption>Snap Layouts menu</figcaption></figure>
+    <figure><div class="frame d"><iframe src="concept-b.html?bar=0&s=launcher" loading="lazy" title="B launcher"></iframe></div><figcaption>Command palette</figcaption></figure>
+    <figure><div class="frame t"><iframe src="concept-b.html?bar=0" loading="lazy" title="B tablet"></iframe></div><figcaption>Tablet 768</figcaption></figure>
+    <figure><div class="frame p"><iframe src="concept-b.html?bar=0" loading="lazy" title="B phone"></iframe></div><figcaption>Phone home</figcaption></figure>
+    <figure><div class="frame p"><iframe src="concept-b.html?bar=0&s=app" loading="lazy" title="B phone app"></iframe></div><figcaption>Phone app</figcaption></figure>
+    <figure><div class="frame p"><iframe src="concept-b.html?bar=0&s=switch" loading="lazy" title="B phone switcher"></iframe></div><figcaption>Phone switcher</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <div class="head"><h2>C · Modern Workspace</h2><span class="tags">muted violet · Manrope + Fira Code · drop-down terminal + dock</span><a href="concept-c.html" target="_blank">open full size ↗</a></div>
+  <p class="desc">Contemporary Linux desktop. The terminal drops down from the panel (toggle with `), the profile window takes the stage, and a labelled dock holds the shortcuts. Launcher is a full-screen app grid.</p>
+  <div class="row">
+    <figure><div class="frame d"><iframe src="concept-c.html?bar=0" loading="lazy" title="C desktop"></iframe></div><figcaption>Desktop 1440 — drop-down terminal</figcaption></figure>
+    <figure><div class="frame d"><iframe src="concept-c.html?bar=0&s=snap" loading="lazy" title="C snap"></iframe></div><figcaption>Snap Layouts menu</figcaption></figure>
+    <figure><div class="frame d"><iframe src="concept-c.html?bar=0&s=launcher" loading="lazy" title="C launcher"></iframe></div><figcaption>App grid launcher</figcaption></figure>
+    <figure><div class="frame t"><iframe src="concept-c.html?bar=0" loading="lazy" title="C tablet"></iframe></div><figcaption>Tablet 768</figcaption></figure>
+    <figure><div class="frame p"><iframe src="concept-c.html?bar=0" loading="lazy" title="C phone"></iframe></div><figcaption>Phone home</figcaption></figure>
+    <figure><div class="frame p"><iframe src="concept-c.html?bar=0&s=app" loading="lazy" title="C phone app"></iframe></div><figcaption>Phone app</figcaption></figure>
+    <figure><div class="frame p"><iframe src="concept-c.html?bar=0&s=switch" loading="lazy" title="C phone switcher"></iframe></div><figcaption>Phone switcher</figcaption></figure>
+  </div>
+</section>
+</body>
+</html>
