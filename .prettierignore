@@ -1,0 +1,8 @@
+node_modules
+dist
+.astro
+reference
+design
+docs
+*.md
+package-lock.json

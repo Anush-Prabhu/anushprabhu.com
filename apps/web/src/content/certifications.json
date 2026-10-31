@@ -1,0 +1,15 @@
+[
+  { "id": "ceh", "order": 1, "name": "Certified Ethical Hacker", "short": "CEH", "group": "Security" },
+  { "id": "chfi", "order": 2, "name": "Computer Hacking Forensic Investigator", "short": "CHFI", "group": "Security" },
+  { "id": "ccna", "order": 3, "name": "Cisco Certified Network Associate", "short": "CCNA", "group": "Networking" },
+  { "id": "cyberops", "order": 4, "name": "Cisco CyberOps Associate", "short": "CyberOps", "group": "Networking" },
+  { "id": "devnet", "order": 5, "name": "Cisco Certified DevNet Associate", "short": "DevNet", "group": "Networking" },
+  { "id": "cyb102", "order": 6, "name": "CYB102 Intermediate Cybersecurity", "short": "CYB102", "group": "CodePath" },
+  {
+    "id": "ai201",
+    "order": 7,
+    "name": "AI201 Applications of AI Engineering (via Anthropic)",
+    "short": "AI201",
+    "group": "CodePath"
+  }
+]

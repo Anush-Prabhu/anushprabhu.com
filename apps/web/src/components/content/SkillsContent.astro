@@ -1,0 +1,39 @@
+---
+import { getCertifications, getSkills } from '../../lib/content'
+const skills = await getSkills()
+const certs = await getCertifications()
+const groups = ['Security', 'Networking', 'CodePath'] as const
+---
+
+<div class="content" data-app-content="skills">
+  <h1>Skills and certifications</h1>
+  <ul class="list" style="margin-top:20px">
+    {skills.map((s) => (
+      <li class="row">
+        <h2 style="margin:0;font-size:var(--fs-md)">{s.data.group}</h2>
+        <ul class="tags" style="margin-top:0" aria-label={s.data.group}>
+          {s.data.items.map((i) => (
+            <li>{i}</li>
+          ))}
+        </ul>
+      </li>
+    ))}
+  </ul>
+  <h2>Certifications</h2>
+  <ul class="list">
+    {groups.map((g) => (
+      <li class="row">
+        <h3>{g === 'CodePath' ? 'CodePath programs' : g}</h3>
+        <ul class="points" style="margin-top:0">
+          {certs
+            .filter((c) => c.data.group === g)
+            .map((c) => (
+              <li>
+                {c.data.name} ({c.data.short})
+              </li>
+            ))}
+        </ul>
+      </li>
+    ))}
+  </ul>
+</div>

@@ -1,0 +1,53 @@
+[
+  {
+    "id": "security",
+    "order": 1,
+    "group": "Security and IAM",
+    "items": [
+      "Detection engineering",
+      "IAM validation",
+      "Active Directory",
+      "Kerberos",
+      "gMSA",
+      "Threat intel",
+      "SOC workflows"
+    ]
+  },
+  { "id": "tools", "order": 2, "group": "Security tools", "items": ["Splunk", "Wazuh", "Burp Suite"] },
+  {
+    "id": "compliance",
+    "order": 3,
+    "group": "Frameworks and compliance",
+    "items": [
+      "NIST",
+      "GDPR",
+      "HIPAA",
+      "SOC 2",
+      "PCI DSS",
+      "ISO 14971",
+      "IEC 62304",
+      "FDA cybersecurity",
+      "Privacy",
+      "Audit readiness"
+    ]
+  },
+  { "id": "cloud", "order": 4, "group": "Cloud and systems", "items": ["Azure", "GCP", "OpenShift", "Linux / RHEL"] },
+  {
+    "id": "ai",
+    "order": 5,
+    "group": "Data and AI",
+    "items": ["RAG", "Neo4j", "Hermes Agent", "pgvector", "Guardrails", "Telemetry pipelines"]
+  },
+  {
+    "id": "languages",
+    "order": 6,
+    "group": "Languages",
+    "items": ["Python", "TypeScript", "JavaScript", "SQL", "PowerShell", "Bash"]
+  },
+  {
+    "id": "dev",
+    "order": 7,
+    "group": "Development and automation",
+    "items": ["REST APIs", "Cypress", "Postman", "Git", "WordPress"]
+  }
+]

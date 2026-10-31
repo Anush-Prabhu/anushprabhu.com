@@ -1,0 +1,26 @@
+---
+import { getProjects } from '../../lib/content'
+const projects = await getProjects()
+---
+
+<div class="content" data-app-content="projects">
+  <h1>Projects</h1>
+  <p class="meta">
+    Things I have built. Full case studies are being written; each entry links to its code where it is public.
+  </p>
+  <ul class="list" style="margin-top:20px">
+    {projects.map((p) => (
+      <li>
+        <h2 style="margin:0">
+          <a href={`/projects/${p.id}`}>{p.data.title}</a>
+        </h2>
+        <p style="margin-top:4px">{p.data.summary}</p>
+        <ul class="tags" aria-label="Stack">
+          {p.data.stack.map((s) => (
+            <li>{s}</li>
+          ))}
+        </ul>
+      </li>
+    ))}
+  </ul>
+</div>

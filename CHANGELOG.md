@@ -2,7 +2,27 @@
 
 Versions follow [Semantic Versioning](https://semver.org). `0.x` releases are pre-launch milestones.
 
-## Unreleased
+## v0.2.0 — 2026-10-31 · Milestone 2: interactive desktop prototype
+
+### Added
+- Astro 7 + TypeScript (strict) workspace in `apps/web`, Preact islands, exact-pinned dependencies (each release at least two weeks old), self-hosted Red Hat fonts.
+- Content collections built from the resume: experience, projects (one page each), skills, certifications, education, publication. No phone number; no email until one is chosen.
+- Real pages for `/`, `/about`, `/experience`, `/projects`, `/projects/[slug]`, `/research`, `/skills`, `/contact` and a 404, readable without JavaScript.
+- Desktop view on screens ≥ 1024 px: top panel, shortcut rail, windows (open, focus, move, minimise, maximise, restore, close), terminal + About snapped side by side by default.
+- Windows 11-style Snap Layouts: hover, keyboard (`Alt+Z`, `↓` on the maximise button) or long-press; only layouts that fit are offered; suggested pairs; Snap Assist fills the remaining zones.
+- Terminal with a fixed command registry (no shell), clickable commands that type themselves, history, Tab completion and a virtual filesystem.
+- Ctrl+K launcher that searches apps and content.
+- The URL follows the focused window; deep links and Back/Forward work. Plain view one click away.
+- Tests: 29 unit tests (window manager, terminal, routing) and 29 Playwright browser tests. Budget check script.
+
+### Measured
+- JS 24.6 KB gzip (budget 40 KB); home page about 117 KB (budget 300 KB).
+- Lighthouse on `/`: mobile 99 / 100 / 100 / 100, desktop 100 / 100 / 100 / 100 (performance / accessibility / best practices / SEO).
+
+### Changed from the plan
+- Window snapping shortcuts are `Alt+Shift+arrows`, not `Alt+arrows` (those are the browser's Back/Forward).
+- ESLint not added yet: strict TypeScript + `astro check` + Prettier cover M2; revisit if the codebase grows.
+- Layout availability follows the app's minimum size rather than fixed screen widths (e.g. four quarters appear at 1024×700 because each quarter still fits).
 
 ### Changed
 - `CLAUDE.md` brought in line with the Milestone 1 decisions; four performance/security floors revised and approved (JS budget, forms, dark-only theme, allowed third-party origins).

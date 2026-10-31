@@ -1,0 +1,94 @@
+---
+import { profile } from '../../data/profile'
+import { getEducation, getExperience, formatRange } from '../../lib/content'
+
+interface Props {
+  /** The home page adds recent work; /about adds education. */
+  variant: 'home' | 'about'
+}
+const { variant } = Astro.props
+const experience = (await getExperience()).filter((e) => ['bofa', 'jio', 'jhmi'].includes(e.id))
+const highlights: Record<string, { name: string; text: string }> = {
+  bofa: {
+    name: 'Bank of America',
+    text: 'Automated the service-account and gMSA lifecycle, cutting provisioning from days to hours.',
+  },
+  jio: { name: 'Jio Platforms', text: 'Prototyped a Cisco ASA/FTD log scanner to speed up SOC triage.' },
+  jhmi: {
+    name: 'Johns Hopkins Medicine',
+    text: 'Built a RAG system with grounded retrieval, consistency checks and safe fallbacks.',
+  },
+}
+const education = await getEducation()
+---
+
+<div class="content" data-app-content="about">
+  {profile.placeholder && <span class="note">Placeholder text based on the resume</span>}
+  <div class="whoami" aria-hidden="true">
+    <div class="l1">
+      (
+      <b>
+        {profile.user}㉿{profile.host}
+      </b>
+      )-[<span class="path">~/about</span>]
+    </div>
+    <div class="l2">
+      <span class="cmd">whoami</span>
+    </div>
+  </div>
+  <h1 class="name">{profile.name}</h1>
+  <p class="lede">{profile.headline}</p>
+  <p class="meta" style="margin-top:16px;max-width:62ch">
+    {profile.facts}
+  </p>
+  <div class="actions">
+    <a class="btn primary" href="/experience">
+      See my experience
+    </a>
+    <a class="btn" href="/contact">
+      Get in touch
+    </a>
+  </div>
+
+  <h2>What I work on</h2>
+  <p>{profile.focus}</p>
+
+  {variant === 'home' && (
+    <>
+      <h2>Recent work</h2>
+      <ul class="list">
+        {experience.map((e) => (
+          <li class="row">
+            <div>
+              <h3>{highlights[e.id].name}</h3>
+              <p class="meta">{formatRange(e.data.start, e.data.end)}</p>
+            </div>
+            <p>{highlights[e.id].text}</p>
+          </li>
+        ))}
+      </ul>
+      <p style="margin-top:14px">
+        <a href="/experience">See all experience</a>
+      </p>
+    </>
+  )}
+
+  {variant === 'about' && (
+    <>
+      <h2>Education</h2>
+      <ul class="list">
+        {education.map((e) => (
+          <li class="row">
+            <p class="meta">{e.data.date}</p>
+            <div>
+              <h3>{e.data.degree}</h3>
+              <p>
+                {e.data.school}, {e.data.place}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </>
+  )}
+</div>

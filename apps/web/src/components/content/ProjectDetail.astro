@@ -1,0 +1,33 @@
+---
+import { render, type CollectionEntry } from 'astro:content'
+
+interface Props {
+  project: CollectionEntry<'projects'>
+}
+const { project } = Astro.props
+const { Content } = await render(project)
+---
+
+<div class="content" data-app-content="projects">
+  <p class="meta" style="margin:0 0 8px">
+    <a href="/projects">All projects</a>
+  </p>
+  <h1>{project.data.title}</h1>
+  <ul class="tags" aria-label="Stack">
+    {project.data.stack.map((s) => (
+      <li>{s}</li>
+    ))}
+  </ul>
+  <div style="margin-top:18px">
+    <Content />
+  </div>
+  <div class="actions">
+    {project.data.repo ? (
+      <a class="btn primary" href={project.data.repo} rel="noopener noreferrer" target="_blank">
+        View the code on GitHub
+      </a>
+    ) : (
+      <p class="meta">The code for this project is not public.</p>
+    )}
+  </div>
+</div>

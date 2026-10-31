@@ -1,0 +1,52 @@
+/* Design tokens — approved hybrid (docs/MILESTONE_1.md §4). Themes override colour tokens only. */
+:root {
+  color-scheme: dark;
+
+  --desk: #0f1620;
+  --surface-1: #151c26;
+  --surface-2: #1b2330;
+  --surface-3: #243040;
+  --border: #283344;
+  --border-strong: #3a4a60;
+  --text-1: #e8edf4;
+  --text-2: #a7b4c6;
+  --text-3: #8592a6;
+  --accent: #5b8def;
+  --accent-weak: rgb(91 141 239 / 0.16);
+  --link: #82adff;
+  --prompt-frame: #4f7fd8;
+  --root: #e5675f;
+  --ok: #5fb87a;
+  --danger: #c4433b;
+  --term-bg: #0c121a;
+
+  --font-display: 'Red Hat Display Variable', system-ui, sans-serif;
+  --font-text: 'Red Hat Text Variable', system-ui, sans-serif;
+  --font-mono: 'Red Hat Mono Variable', ui-monospace, monospace;
+
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-md: 15px;
+  --fs-lg: 18px;
+  --fs-xl: 21px;
+  --fs-2xl: 34px;
+  --fs-3xl: 56px;
+
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 10px;
+
+  --panel-h: 32px;
+  --rail-w: 92px;
+  --gap: 8px;
+  --shadow: 0 12px 32px rgb(0 0 0 / 0.42);
+
+  --dur: 180ms;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur: 0ms;
+  }
+}

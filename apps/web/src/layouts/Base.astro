@@ -1,0 +1,112 @@
+---
+import '../styles/base.css'
+import Desktop from '../components/desktop/Desktop'
+import { site, profile } from '../data/profile'
+import { getSiteData } from '../lib/content'
+import { NAV, type AppId } from '../components/desktop/apps'
+
+interface Props {
+  title?: string
+  description?: string
+  /** Which desktop app this page's content belongs to. */
+  app: AppId
+  /** Shown in the plain view's window-style frame, e.g. "~/experience". */
+  path: string
+}
+
+const { title, description = site.description, app, path } = Astro.props
+const fullTitle = title ? `${title} — ${site.title}` : `${site.title} — security engineering, automation, applied AI`
+// With build.format 'file', pathnames arrive as "/index.html" and "/experience.html"; URLs never show either.
+const cleanPath =
+  Astro.url.pathname
+    .replace(/\/index\.html$/, '/')
+    .replace(/\.html$/, '')
+    .replace(/(.)\/$/, '$1') || '/'
+const canonical = new URL(cleanPath, site.url).href
+const current = cleanPath
+const data = await getSiteData()
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#0f1620" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+    <script is:inline>
+      // Runs before paint: mark JS available and, on wide screens, hide the plain view while the desktop starts.
+      // The CSS falls back to the plain view after 3 s if the desktop never mounts.
+      ;(function () {
+        var d = document.documentElement
+        d.setAttribute('data-js', '')
+        var plain = false
+        try {
+          plain = localStorage.getItem('view') === 'plain'
+        } catch (e) {}
+        if (!plain && window.matchMedia('(min-width: 1024px)').matches) d.setAttribute('data-view', 'pending')
+      })()
+    </script>
+  </head>
+  <body>
+    <a class="skip-link plain" href="#content">
+      Skip to content
+    </a>
+    <header class="plain plain-header">
+      <div class="inner">
+        <a class="brand" href="/">
+          <b>{profile.user}</b>@{profile.host}
+        </a>
+        <nav class="plain-nav" aria-label="Main">
+          <ul>
+            {NAV.map((item) => (
+              <li>
+                <a href={item.route} aria-current={current === item.route ? 'page' : undefined}>
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <button class="open-desktop" type="button" data-open-desktop>
+          Open desktop view
+        </button>
+      </div>
+    </header>
+    <main id="content" class="plain plain-main">
+      <div class="frame">
+        <div class="frame-bar" aria-hidden="true">
+          {profile.user}@{profile.host}: {path}
+        </div>
+        <div class="frame-body">
+          <slot />
+        </div>
+      </div>
+    </main>
+    <footer class="plain plain-footer">
+      <p>
+        © {new Date().getFullYear()} {profile.name}
+      </p>
+    </footer>
+
+    <Desktop client:media="(min-width: 1024px)" initialApp={app} data={data} />
+
+    <script>
+      // Plain view → desktop view (only offered on wide screens, see CSS).
+      document.querySelector('[data-open-desktop]')?.addEventListener('click', () => {
+        try {
+          localStorage.removeItem('view')
+        } catch {}
+        location.reload()
+      })
+    </script>
+  </body>
+</html>

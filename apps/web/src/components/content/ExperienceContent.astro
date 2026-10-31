@@ -1,0 +1,41 @@
+---
+import { getExperience, formatRange } from '../../lib/content'
+const experience = await getExperience()
+---
+
+<div class="content" data-app-content="experience">
+  <h1>Experience</h1>
+  <p class="meta">Five roles across security analytics, identity automation, applied AI and web platforms.</p>
+  <ul class="list" style="margin-top:20px">
+    {experience.map((e) => (
+      <li id={e.id}>
+        <div class="row">
+          <div>
+            <p class="meta" style="margin-top:0">
+              {formatRange(e.data.start, e.data.end)}
+            </p>
+          </div>
+          <div>
+            <h2 style="margin:0">{e.data.role}</h2>
+            <p>
+              <strong>{e.data.company}</strong>
+            </p>
+            <p class="meta" style="margin-top:0">
+              {e.data.focus}
+            </p>
+            <ul class="points">
+              {e.data.points.map((p) => (
+                <li>{p}</li>
+              ))}
+            </ul>
+            <ul class="tags" aria-label="Technologies">
+              {e.data.tech.map((t) => (
+                <li>{t}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </li>
+    ))}
+  </ul>
+</div>

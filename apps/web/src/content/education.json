@@ -1,0 +1,18 @@
+[
+  {
+    "id": "jhu",
+    "order": 1,
+    "school": "Johns Hopkins University, Whiting School of Engineering",
+    "place": "Baltimore, Maryland, USA",
+    "degree": "Master of Science in Security Informatics (MSSI)",
+    "date": "May 2026"
+  },
+  {
+    "id": "mumbai",
+    "order": 2,
+    "school": "University of Mumbai, Ramrao Adik Institute of Technology",
+    "place": "Navi Mumbai, India",
+    "degree": "Bachelor of Engineering in Information Technology, with Distinction",
+    "date": "May 2023"
+  }
+]
