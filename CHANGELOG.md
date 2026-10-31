@@ -2,6 +2,11 @@
 
 Versions follow [Semantic Versioning](https://semver.org). `0.x` releases are pre-launch milestones.
 
+## Unreleased
+
+### Changed
+- `CLAUDE.md` brought in line with the Milestone 1 decisions; four performance/security floors revised and approved (JS budget, forms, dark-only theme, allowed third-party origins).
+
 ## v0.1.0 — 2026-10-31 · Milestone 1: requirements and interface direction
 
 ### Added
