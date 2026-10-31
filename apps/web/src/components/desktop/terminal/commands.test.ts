@@ -18,6 +18,7 @@ const data: SiteData = {
     {
       id: 'bofa',
       company: 'Bank of America',
+      short: 'Bank of America',
       role: 'Quality Specialist',
       focus: 'IAM',
       dates: 'Jul 2023 – May 2024',
@@ -39,6 +40,7 @@ const data: SiteData = {
   certifications: [{ name: 'Certified Ethical Hacker', short: 'CEH' }],
   education: [{ degree: 'MSSI', school: 'JHU', date: 'May 2026' }],
   publications: [{ title: 'Paper', status: 'published', isbn: '978' }],
+  campaignChips: { general: ['experience'] },
 }
 const ctx = (over: Partial<Ctx> = {}): Ctx => ({ data, cwd: [], history: [], ...over })
 const text = (r: ReturnType<typeof execute>) => r.lines.map((l) => l.map((s) => s.text).join('')).join('\n')

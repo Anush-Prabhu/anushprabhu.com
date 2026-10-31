@@ -2,6 +2,27 @@
 
 Versions follow [Semantic Versioning](https://semver.org). `0.x` releases are pre-launch milestones.
 
+## v0.4.0 — 2026-10-31 · Milestone 4: complete frontend
+
+### Added
+- **Campaign-aware home page.** `?utm_campaign=` selects `security`, `research` or `product` (plus aliases); anything unknown or unsafe shows the general intro. Campaigns only re-word the headline and re-order existing experience and projects, by id. The build fails if a campaign names content or a page that doesn't exist. Variants are swapped in before paint from `<template>`s, so search engines and no-JS visitors always get the general page and the canonical URL never changes. The desktop's About window and the terminal's suggested commands follow the campaign.
+- **Printable resume** at `/resume`, built from the same content (no phone number), with "Save as PDF" through the browser's print dialog. Printing any page prints clean black-on-white content, never the desktop.
+- **Contact** now shows `anushprabhu4@gmail.com`, plus LinkedIn and GitHub.
+- **Privacy, terms and accessibility pages**, describing what the site actually does (no cookies, no tracking; three browser-storage keys listed by name). Linked from the footer, the desktop's session menu and search.
+- **SEO and sharing:** `sitemap.xml` and `robots.txt` (a few lines each, no dependency), JSON-LD (Person, WebSite and ProfilePage on home; SoftwareSourceCode on public projects only; ScholarlyArticle for the publication), Open Graph and large Twitter card with a generated `og.png` (`scripts/make-og.mjs`).
+- Short names and one-line highlights for each role in the experience content.
+- Tests: 40 unit tests (incl. campaign resolution and validation) and 69 Playwright tests (campaigns on plain and desktop views, resume printing to PDF, no phone number anywhere, sitemap, structured data).
+
+### Fixed
+- On phones, the back bar sat 48 px below the status bar on every page except home (the frame's `overflow: hidden` broke `position: sticky`). Now uses `overflow: clip`, with a regression test.
+
+### Measured
+- JS 28.6 KB gzip (budget 40 KB). Lighthouse 99–100 on phone `/`, `/resume`, `/privacy` and desktop `/`.
+
+### Deferred
+- Contact form: arrives with the API (Milestone 6/7) so it can actually deliver.
+- `product` campaign uses existing experience only until product/PM material is provided.
+
 ## v0.3.0 — 2026-10-31 · Milestone 3: phone and tablet
 
 ### Added

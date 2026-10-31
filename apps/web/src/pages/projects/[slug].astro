@@ -3,6 +3,8 @@ import type { GetStaticPaths } from 'astro'
 import Base from '../../layouts/Base.astro'
 import ProjectDetail from '../../components/content/ProjectDetail.astro'
 import { getProjects } from '../../lib/content'
+import { sourceCode } from '../../lib/structured-data'
+import { site } from '../../data/profile'
 
 export const getStaticPaths = (async () =>
   (await getProjects()).map((project) => ({
@@ -11,8 +13,23 @@ export const getStaticPaths = (async () =>
   }))) satisfies GetStaticPaths
 
 const { project } = Astro.props
+const jsonLd = project.data.repo
+  ? sourceCode({
+      title: project.data.title,
+      summary: project.data.summary,
+      repo: project.data.repo,
+      stack: project.data.stack,
+      url: new URL(`/projects/${project.id}`, site.url).href,
+    })
+  : undefined
 ---
 
-<Base title={project.data.title} app="projects" path={`~/projects/${project.id}`} description={project.data.summary}>
+<Base
+  title={project.data.title}
+  app="projects"
+  path={`~/projects/${project.id}`}
+  description={project.data.summary}
+  jsonLd={jsonLd}
+>
   <ProjectDetail project={project} />
 </Base>

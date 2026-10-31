@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks'
 import { GAP, isFeasible, layoutById, type LayoutId, type Rect } from '../../lib/wm/geometry'
 import { createStore, findWin } from '../../lib/wm/state'
+import { currentCampaign } from '../../lib/campaign-dom'
 import type { SiteData } from '../../lib/site-data'
 import { APPS, SHORTCUTS, appForPath, type AppId } from './apps'
-import { AppBody, ResumeNotice, contentCache, extractContent } from './AppBody'
+import { AppBody, contentCache, extractContent } from './AppBody'
 import { Icon } from './Icon'
 import { Launcher } from './Launcher'
 import { Panel } from './Panel'
@@ -320,6 +321,7 @@ function DesktopView({ initialApp, data }: DesktopProps) {
           else openApp(id, undefined, { push: false })
         }}
         onResume={() => openApp('resume')}
+        onInfo={(app) => openApp(app)}
         onPlainView={toPlain}
         onReset={reset}
       />
@@ -379,12 +381,11 @@ function DesktopView({ initialApp, data }: DesktopProps) {
               {id === 'terminal' ? (
                 <Terminal
                   data={data}
+                  chips={data.campaignChips[currentCampaign()]}
                   active={s.focused === 'terminal'}
                   onEffect={(effect) => openApp(effect.app, effect.path)}
                   onLink={(url) => window.open(url, '_blank', 'noopener,noreferrer')}
                 />
-              ) : id === 'resume' ? (
-                <ResumeNotice onOpen={(app) => openApp(app)} />
               ) : (
                 <AppBody app={id} path={paths[id] ?? def.route!} onNavigate={(app, path) => openApp(app, path)} />
               )}

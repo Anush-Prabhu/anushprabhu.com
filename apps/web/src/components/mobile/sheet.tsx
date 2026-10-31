@@ -1,6 +1,7 @@
 // Full-screen phone sheets (terminal, search, recent apps). Loaded on demand by boot.ts.
 import { render } from 'preact'
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
+import { currentCampaign } from '../../lib/campaign-dom'
 import type { SiteData } from '../../lib/site-data'
 import { APPS, type AppId } from '../desktop/apps'
 import { Icon } from '../desktop/Icon'
@@ -59,7 +60,7 @@ function Sheet({ kind: initial, onClose }: { kind: SheetKind; onClose(): void })
     return () => window.removeEventListener('keydown', onKey)
   }, [kind])
 
-  const index = useMemo(() => (data ? buildIndex(data).filter((i) => i.app !== 'resume') : []), [data])
+  const index = useMemo(() => (data ? buildIndex(data) : []), [data])
 
   return (
     <div ref={ref} class="m-sheet" role="dialog" aria-modal="true" aria-label={TITLES[kind]}>
@@ -75,10 +76,11 @@ function Sheet({ kind: initial, onClose }: { kind: SheetKind; onClose(): void })
         {kind === 'terminal' && data && (
           <Terminal
             data={data}
+            chips={data.campaignChips[currentCampaign()]}
             active
             docked
             onEffect={(effect) => {
-              if (effect.app === 'terminal' || effect.app === 'resume') return
+              if (effect.app === 'terminal') return
               const path = routeFor(effect.app, effect.path)
               if (path) go(path)
             }}

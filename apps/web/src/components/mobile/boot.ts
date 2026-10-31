@@ -43,6 +43,17 @@ export function boot() {
     void open(trigger.dataset.mOpen as SheetKind, trigger)
   })
 
+  // "Save as PDF": print the resume. Printing always prints the page underneath, and in the desktop view that can be a
+  // different page than the URL suggests (windows change the URL), so check the content actually loaded.
+  document.addEventListener('click', (e) => {
+    if (!(e.target as Element).closest('[data-print]')) return
+    if (document.querySelector('.plain [data-app-content="resume"]')) window.print()
+    else window.open('/resume?print=1', '_blank', 'noopener')
+  })
+  if (new URLSearchParams(location.search).has('print') && location.pathname.replace(/\.html$/, '') === '/resume') {
+    void document.fonts.ready.then(() => window.print())
+  }
+
   // Plain view → desktop view (offered where the desktop can run, see CSS).
   document.querySelector('[data-open-desktop]')?.addEventListener('click', () => {
     try {

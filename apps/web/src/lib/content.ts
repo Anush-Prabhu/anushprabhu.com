@@ -1,5 +1,8 @@
 import { getCollection } from 'astro:content'
+import { CAMPAIGNS } from '../data/campaigns'
 import { profile } from '../data/profile'
+import { ROUTES } from '../data/routes'
+import { validateCampaigns } from './campaigns'
 import type { SiteData } from './site-data'
 
 const byOrder = <T extends { data: { order: number } }>(a: T, b: T) => a.data.order - b.data.order
@@ -29,6 +32,12 @@ export async function getSiteData(): Promise<SiteData> {
     getEducation(),
     getPublications(),
   ])
+  // Fails the build if a campaign mentions content or pages that don't exist.
+  validateCampaigns(CAMPAIGNS, {
+    experience: experience.map((e) => e.id),
+    projects: projects.map((p) => p.id),
+    routes: [...ROUTES],
+  })
   return {
     profile: {
       name: profile.name,
@@ -44,6 +53,7 @@ export async function getSiteData(): Promise<SiteData> {
     experience: experience.map((e) => ({
       id: e.id,
       company: e.data.company,
+      short: e.data.short,
       role: e.data.role,
       focus: e.data.focus,
       dates: formatRange(e.data.start, e.data.end),
@@ -62,5 +72,6 @@ export async function getSiteData(): Promise<SiteData> {
     certifications: certifications.map((c) => ({ name: c.data.name, short: c.data.short })),
     education: education.map((e) => ({ degree: e.data.degree, school: e.data.school, date: e.data.date })),
     publications: publications.map((p) => ({ title: p.data.title, status: p.data.status, isbn: p.data.isbn ?? null })),
+    campaignChips: Object.fromEntries(CAMPAIGNS.map((c) => [c.id, c.terminalChips])),
   }
 }

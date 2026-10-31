@@ -146,7 +146,8 @@ svg {
   border: 1px solid var(--border);
   border-radius: var(--r-md);
   background: var(--surface-1);
-  overflow: hidden;
+  /* clip, not hidden: hidden would make the frame the scroll container and break the sticky back bar on phones */
+  overflow: clip;
 }
 .frame-bar {
   height: 34px;
@@ -595,4 +596,161 @@ html.sheet-open body {
 .m-recent span {
   font: 13px var(--font-mono);
   color: var(--text-3);
+}
+
+/* ---------------- Footer ---------------- */
+.plain-footer nav ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin-bottom: 8px;
+}
+.plain-footer a {
+  color: var(--text-2);
+}
+
+/* ---------------- Resume ---------------- */
+.resume {
+  max-width: 78ch;
+}
+.resume-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin-bottom: 24px;
+}
+.resume-tools .meta {
+  margin: 0;
+}
+.content .resume-head h1 {
+  font: 800 var(--fs-2xl) / 1.1 var(--font-display);
+}
+.resume-title {
+  margin-top: 4px;
+  color: var(--text-1) !important;
+  font-weight: 500;
+}
+.resume-contact {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 16px;
+  margin-top: 6px;
+  color: var(--text-2);
+  font-size: 14px;
+}
+.content.resume h2 {
+  font-size: var(--fs-md);
+  margin: 26px 0 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+.resume-item + .resume-item {
+  margin-top: 14px;
+}
+.resume-line {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0 16px;
+}
+.resume-line .meta {
+  margin: 0;
+}
+.resume-role {
+  color: var(--text-1) !important;
+  font-style: italic;
+}
+.resume-skills {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 16px;
+  font-size: 14.5px;
+}
+.resume-skills dt {
+  font-weight: 600;
+}
+.resume-skills dd {
+  margin: 0;
+  color: var(--text-2);
+}
+@media (max-width: 599px) {
+  .resume-skills {
+    grid-template-columns: 1fr;
+  }
+  .resume-skills dd {
+    margin-bottom: 6px;
+  }
+}
+
+/* ---------------- Print: always the page's own content, black on white ---------------- */
+@media print {
+  @page {
+    margin: 14mm 14mm 16mm;
+  }
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .desktop,
+  .plain-header,
+  .plain-footer,
+  .m-dock,
+  .skip-link,
+  .frame-bar,
+  .note,
+  .js-only,
+  .m-only,
+  #m-sheet-host {
+    display: none !important;
+  }
+  html[data-view] .plain {
+    display: block !important;
+    visibility: visible !important;
+    animation: none !important;
+  }
+  .plain-main,
+  .frame-body {
+    padding: 0 !important;
+    max-width: none;
+  }
+  .frame {
+    border: 0 !important;
+    background: none !important;
+  }
+  .content,
+  .content p,
+  .content .meta,
+  .content strong,
+  .content li,
+  .resume-skills dd,
+  .resume-contact {
+    color: #000 !important;
+  }
+  .content a {
+    color: #000 !important;
+    text-decoration: none;
+  }
+  .content {
+    font-size: 10.5pt;
+    line-height: 1.4;
+    max-width: none;
+  }
+  .content.resume h2 {
+    border-color: #999;
+    break-after: avoid;
+  }
+  .resume-item {
+    break-inside: avoid;
+  }
+  .content .tags li,
+  .whoami {
+    display: none;
+  }
 }

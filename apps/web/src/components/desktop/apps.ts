@@ -1,6 +1,17 @@
 import type { Size } from '../../lib/wm/geometry'
 
-export type AppId = 'terminal' | 'about' | 'experience' | 'projects' | 'research' | 'skills' | 'contact' | 'resume'
+export type AppId =
+  | 'terminal'
+  | 'about'
+  | 'experience'
+  | 'projects'
+  | 'research'
+  | 'skills'
+  | 'contact'
+  | 'resume'
+  | 'privacy'
+  | 'terms'
+  | 'accessibility'
 
 export type IconName = 'terminal' | 'user' | 'briefcase' | 'folder' | 'research' | 'award' | 'mail' | 'file'
 
@@ -10,7 +21,7 @@ export interface AppDef {
   /** Short label for shortcuts and the panel. */
   label: string
   icon: IconName
-  /** Page that holds this app's content; null for apps with no page (terminal, resume notice). */
+  /** Page that holds this app's content; null for apps with no page (the terminal). */
   route: string | null
   /** Launcher description in plain language. */
   description: string
@@ -94,10 +105,40 @@ export const APPS: Record<AppId, AppDef> = {
     title: 'Resume',
     label: 'Resume',
     icon: 'file',
-    route: null,
-    description: 'Downloadable PDF (being prepared)',
-    min: { w: 340, h: 220 },
-    size: { w: 520, h: 300 },
+    route: '/resume',
+    description: 'Printable, and saves as a PDF',
+    min: { w: 400, h: 300 },
+    size: { w: 820, h: 680 },
+  },
+  privacy: {
+    id: 'privacy',
+    title: 'Privacy',
+    label: 'Privacy',
+    icon: 'file',
+    route: '/privacy',
+    description: 'What this site stores and why',
+    min: { w: 380, h: 300 },
+    size: { w: 720, h: 600 },
+  },
+  terms: {
+    id: 'terms',
+    title: 'Terms',
+    label: 'Terms',
+    icon: 'file',
+    route: '/terms',
+    description: 'Terms of use',
+    min: { w: 380, h: 280 },
+    size: { w: 680, h: 520 },
+  },
+  accessibility: {
+    id: 'accessibility',
+    title: 'Accessibility',
+    label: 'Accessibility',
+    icon: 'file',
+    route: '/accessibility',
+    description: 'How this site is built to be usable by everyone',
+    min: { w: 380, h: 300 },
+    size: { w: 720, h: 600 },
   },
 }
 
@@ -121,7 +162,11 @@ export const NAV = [
   { label: 'Research', route: '/research' },
   { label: 'Skills', route: '/skills' },
   { label: 'Contact', route: '/contact' },
+  { label: 'Resume', route: '/resume' },
 ]
+
+/** Pages reachable from the session menu, footer and search, but not shortcuts. */
+export const INFO_APPS: AppId[] = ['privacy', 'terms', 'accessibility']
 
 /** Which app shows a given path. `/` is the About app's home variant. */
 export function appForPath(path: string): AppId | null {

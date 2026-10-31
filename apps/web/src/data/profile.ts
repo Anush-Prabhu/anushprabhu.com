@@ -11,12 +11,14 @@ export const profile = {
   focus:
     'Detection engineering with Splunk and Wazuh, identity automation across Active Directory, Kerberos and gMSA, and AI with guardrails that stays grounded in approved sources. Compliance work under NIST, HIPAA and SOC 2.',
   location: 'Baltimore, MD',
-  /** Undecided — see CLAUDE.md open question 1. Contact surfaces must handle `null`. */
-  email: null as string | null,
+  /** Public contact address (decided 2026-10-31). */
+  email: 'anushprabhu4@gmail.com' as string | null,
+  /** Title line used on the printable resume, from the resume itself. */
+  resumeTitle: 'Security Engineering | Automation | Applied AI / RAG | Python | TypeScript',
   github: 'https://github.com/Anush-Prabhu',
   linkedin: 'https://www.linkedin.com/in/anush-prabhu/',
-  /** Redacted PDF arrives in Milestone 5. */
-  resumeUrl: null as string | null,
+  /** Printable resume page (no phone number). */
+  resumeUrl: '/resume' as string | null,
   placeholder: true,
 } as const
 

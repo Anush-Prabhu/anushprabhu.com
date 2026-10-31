@@ -1,0 +1,70 @@
+---
+import { profile } from '../../data/profile'
+const updated = '31 October 2026'
+---
+
+<div class="content" data-app-content="privacy">
+  <h1>Privacy</h1>
+  <p class="meta">Last updated {updated}</p>
+
+  <p style="margin-top:18px">
+    This is my personal portfolio. It is built to collect as little as possible. This page describes what the site does
+    today; it will be updated before anything here changes.
+  </p>
+
+  <h2>What I collect</h2>
+  <p>
+    Nothing. The site has no accounts, no contact form, no analytics, no advertising and no tracking. It sets no
+    cookies.
+  </p>
+
+  <h2>What your browser keeps on your device</h2>
+  <p>
+    A few small settings are stored in your own browser so the site works the way you left it. They never leave your
+    device:
+  </p>
+  <ul class="points">
+    <li>
+      <strong>view</strong>: whether you chose the plain view instead of the desktop (kept until you clear it).
+    </li>
+    <li>
+      <strong>campaign</strong>: which introduction to show if you arrived from a link with a campaign tag (cleared when
+      you close the tab).
+    </li>
+    <li>
+      <strong>recent-apps</strong>: the pages you opened, for the phone's Recent list (cleared when you close the tab).
+    </li>
+  </ul>
+  <p>You can remove them at any time by clearing this site's data in your browser settings.</p>
+
+  <h2>Links with campaign tags</h2>
+  <p>
+    Some links to this site include tags such as <code>utm_campaign</code>. Your browser reads them only to choose which
+    introduction to show. They are not stored anywhere else and are not sent to anyone.
+  </p>
+
+  <h2>Hosting</h2>
+  <p>
+    Like any website, the company that hosts it may keep standard request logs (such as IP address, time and page
+    requested) for security and to keep the service running. I don't use those logs to identify visitors.
+  </p>
+
+  <h2>Fonts and other sites</h2>
+  <p>
+    Fonts are served from this site, not from a third party. Links to GitHub and LinkedIn take you to those sites, and
+    their own privacy policies apply there.
+  </p>
+
+  <h2>Coming later</h2>
+  <p>
+    I plan to add privacy-friendly, cookie-free visit statistics, a contact form and an assistant that answers questions
+    about my work. Before any of them goes live, this page will explain what each one collects, why, how long it is kept
+    and how to opt out.
+  </p>
+
+  <h2>Contact</h2>
+  <p>
+    Questions or requests about your data:{' '}
+    {profile.email ? <a href={`mailto:${profile.email}`}>{profile.email}</a> : 'see the contact page'}.
+  </p>
+</div>

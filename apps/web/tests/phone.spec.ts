@@ -26,6 +26,16 @@ test('apps open full-screen with a back bar, and Back returns home', async ({ pa
   await expect(page).toHaveURL(/\/$/)
 })
 
+test('the back bar sits directly under the status bar, also while scrolling', async ({ page }) => {
+  await page.goto('/experience')
+  for (const y of [0, 600]) {
+    await page.evaluate((top) => window.scrollTo(0, top), y)
+    const header = (await page.locator('.plain-header').boundingBox())!
+    const bar = (await page.locator('.frame-bar').boundingBox())!
+    expect(Math.abs(bar.y - (header.y + header.height))).toBeLessThanOrEqual(1)
+  }
+})
+
 test('touch targets in the dock and grid are at least 44px', async ({ page }) => {
   await page.goto('/')
   const targets = page.locator('.m-dock > *, .m-app .tile, .m-icon, .m-search')

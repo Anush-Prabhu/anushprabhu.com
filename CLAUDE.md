@@ -3,9 +3,9 @@
 Personal portfolio and resume site for Anush Prabhu (security engineering, automation, applied AI),
 to be served at **anushprabhu.com**.
 
-> **Status: Milestone 3 released as v0.3.0** (2026-10-31): phone and tablet. v0.1.0 = M1 (plan in
-> `docs/MILESTONE_1.md`, visual direction in `design/hybrid.html`), v0.2.0 = M2 desktop. Do not start Milestone 4 or
-> deploy without the owner's go-ahead.
+> **Status: Milestone 4 released as v0.4.0** (2026-10-31): campaigns, resume page, contact, legal pages,
+> SEO. Released: v0.1.0 = M1 plan (`docs/MILESTONE_1.md`, `design/hybrid.html`), v0.2.0 = M2 desktop, v0.3.0 = M3 phone
+> and tablet. Do not start Milestone 5 or deploy without the owner's go-ahead.
 >
 > Before claiming work is done: `npm run check`, `npm test`, `npm run build`, `npm run budget -w apps/web`, `npm run e2e`.
 
@@ -30,14 +30,15 @@ to be served at **anushprabhu.com**.
 | Windows features | Only Windows 11 Snap Layouts (phased: menu + Snap Assist first; drag-to-snap, snap groups, resizing later). |
 | Screen sizes (M3) | **Desktop** ≥ 1024 px: full window manager. **Tablet** 600–1023 px wide and ≥ 500 px tall: same desktop island without the shortcut rail; windows open full-screen, no free dragging, two-up split via Snap Layouts (side by side in landscape, stacked top/bottom in portrait); tapping maximise opens the layout menu. **Phone** (< 600 px wide, or < 500 px tall): no window manager. Pages become full-screen "apps" with a Linux status bar, back bar and bottom dock; the home page is an app grid. Terminal, search and recent apps open as full-screen sheets whose JavaScript loads only when tapped. |
 | Existing React/Vite draft | **Port content, replace code.** Moved to `reference/vite-draft/` (git-ignored) at the start of M2; its `src/data/resume.js` is reference material only. |
-| Resume PDF | Public version must **not** include the phone number (redacted copy made in Milestone 5). The unredacted original lives in `reference/vite-draft/public/` and must never be committed or published. |
+| Resume | **Printable `/resume` page** built from the same content (no phone number), with "Save as PDF" via the browser's print. Replaces a redacted PDF file (decided 2026-10-31). The unredacted original PDF lives in `reference/vite-draft/public/` and must never be committed or published. |
 | Repository | `github.com/Anush-Prabhu/anushprabhu.com` (renamed from `Anush-Prabhu.github.io`, so GitHub Pages never publishes it). Push as the `Anush-Prabhu` account per command: `GH_TOKEN=$(gh auth token --user Anush-Prabhu)`; the machine's default gh account is a different one. |
 | Versioning | Semantic versions as annotated git tags, recorded in `CHANGELOG.md`. `0.x` = pre-launch milestones. v0.1.0 = Milestone 1. |
 | Hosting | **Heroku** (student plan) for the static site and the API. Must stay portable; Cloudflare Pages + Workers is the fallback if the student plan isn't available. |
 | Domain | `anushprabhu.com`, owned by Anush. |
 | Pages | `/`, `/about`, `/experience`, `/projects`, `/projects/[slug]`, `/research`, `/skills`, `/contact`, `/privacy`, `/terms`, `/accessibility`, `/404`. Each opens as a desktop window with JS, and as a plain page without. |
-| Public email | **Undecided** (see *Open questions*). Must be settled before Milestone 4. |
+| Public email | `anushprabhu4@gmail.com` (decided 2026-10-31). Used on the contact page, structured data, privacy page and as the lead destination. |
 | Ask Anush (AI) | One shared backend for the terminal `ask` command and a chat window. Providers: Anthropic, Google, xAI behind one interface with fallback; keys server-side only. Full approved content in context (no vector DB). Not connected to a paid API until the owner reviews Milestone 6. |
+| Contact form | **Not until the API exists (M6/M7).** Until then: email (`mailto:`), LinkedIn, GitHub. A form that cannot deliver would be fake functionality (decided 2026-10-31). |
 | Leads / CRM | Contact form and chatbot hand-off create leads through a CRM adapter (email/webhook first, a CRM later). An MCP server on the API exposes leads and site data to AI tools. Designed in Milestone 1, built later. |
 | Analytics | Privacy-friendly, cookieless; tool chosen later. No fingerprinting (Fingerprint.io dropped 2026-10-31). Must comply with US, UK, Canada and EU rules; honour Global Privacy Control. |
 | Bot protection | Cloudflare Turnstile + rate limiting on the API. |
@@ -107,7 +108,9 @@ All images go through `astro:assets` with explicit `width`/`height` and modern f
 - Campaign (`utm_*`) parameters never change the canonical URL or create indexable variants.
 - Open Graph + Twitter card tags with a static OG image per page type.
 - JSON-LD `Person` + `ProfilePage` on the home page; `ScholarlyArticle` and `SoftwareSourceCode` only where real
-  content supports them. `sitemap.xml` (`@astrojs/sitemap`) and `robots.txt`.
+  content supports them. `sitemap.xml` and `robots.txt` are small endpoints in `src/pages/` driven by
+  `src/data/routes.ts` (no sitemap dependency needed).
+- Campaigns live in `src/data/campaigns.ts`: they reference content by id only and are validated on every build.
 - `www` and `*.herokuapp.com` redirect (301) to the apex domain.
 
 ## Security requirements (accepted — floors)
@@ -154,8 +157,6 @@ All images go through `astro:assets` with explicit `width`/`height` and modern f
 
 ## Open questions
 
-1. **Public email:** `anushprabhu4@gmail.com` (on the resume), `anushprabhu1@gmail.com`, or a domain address
-   such as `hello@anushprabhu.com`. Needed before Milestone 4.
 2. **Featured projects:** which ones, with what detail (write-ups, screenshots, repo links)?
 3. **Analytics tool:** GoatCounter, Plausible, Cloudflare Web Analytics or another cookieless option.
 4. **Heroku student plan:** confirm availability; otherwise switch to the Cloudflare fallback.

@@ -13,6 +13,7 @@ export interface PanelProps {
   onTerminal(): void
   onTask(id: AppId): void
   onResume(): void
+  onInfo(app: 'privacy' | 'terms' | 'accessibility'): void
   onPlainView(): void
   onReset(): void
 }
@@ -147,6 +148,15 @@ export function Panel(p: PanelProps) {
               </button>
               <button type="button" role="menuitem" onClick={pick(p.onPlainView)}>
                 Switch to plain view
+              </button>
+              <button type="button" role="menuitem" onClick={pick(() => p.onInfo('privacy'))}>
+                Privacy
+              </button>
+              <button type="button" role="menuitem" onClick={pick(() => p.onInfo('accessibility'))}>
+                Accessibility
+              </button>
+              <button type="button" role="menuitem" onClick={pick(() => p.onInfo('terms'))}>
+                Terms of use
               </button>
             </div>
           )}

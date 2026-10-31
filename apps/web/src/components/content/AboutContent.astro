@@ -1,25 +1,21 @@
 ---
+import { CAMPAIGNS, GENERAL } from '../../data/campaigns'
 import { profile } from '../../data/profile'
-import { getEducation, getExperience, formatRange } from '../../lib/content'
+import { campaignLookup } from '../../lib/campaigns'
+import { getEducation, getExperience, getProjects } from '../../lib/content'
+import HomeIntro from './HomeIntro.astro'
 
 interface Props {
-  /** The home page adds recent work; /about adds education. */
+  /** The home page is campaign-aware and adds recent work; /about adds education. */
   variant: 'home' | 'about'
 }
 const { variant } = Astro.props
-const experience = (await getExperience()).filter((e) => ['bofa', 'jio', 'jhmi'].includes(e.id))
-const highlights: Record<string, { name: string; text: string }> = {
-  bofa: {
-    name: 'Bank of America',
-    text: 'Automated the service-account and gMSA lifecycle, cutting provisioning from days to hours.',
-  },
-  jio: { name: 'Jio Platforms', text: 'Prototyped a Cisco ASA/FTD log scanner to speed up SOC triage.' },
-  jhmi: {
-    name: 'Johns Hopkins Medicine',
-    text: 'Built a RAG system with grounded retrieval, consistency checks and safe fallbacks.',
-  },
-}
+const experience = await getExperience()
+const projects = await getProjects()
 const education = await getEducation()
+const general = CAMPAIGNS.find((c) => c.id === GENERAL)!
+const others = CAMPAIGNS.filter((c) => c.id !== GENERAL)
+const lookup = campaignLookup()
 ---
 
 <div class="content" data-app-content="about">
@@ -37,18 +33,12 @@ const education = await getEducation()
     </div>
   </div>
   <h1 class="name">{profile.name}</h1>
-  <p class="lede">{profile.headline}</p>
+  <div data-campaign-slot="intro">
+    <HomeIntro campaign={general} part="intro" experience={experience} projects={projects} />
+  </div>
   <p class="meta" style="margin-top:16px;max-width:62ch">
     {profile.facts}
   </p>
-  <div class="actions">
-    <a class="btn primary" href="/experience">
-      See my experience
-    </a>
-    <a class="btn" href="/contact">
-      Get in touch
-    </a>
-  </div>
   <slot name="after-intro" />
 
   <h2>What I work on</h2>
@@ -56,21 +46,19 @@ const education = await getEducation()
 
   {variant === 'home' && (
     <>
-      <h2>Recent work</h2>
-      <ul class="list">
-        {experience.map((e) => (
-          <li class="row">
-            <div>
-              <h3>{highlights[e.id].name}</h3>
-              <p class="meta">{formatRange(e.data.start, e.data.end)}</p>
-            </div>
-            <p>{highlights[e.id].text}</p>
-          </li>
-        ))}
-      </ul>
-      <p style="margin-top:14px">
-        <a href="/experience">See all experience</a>
-      </p>
+      <div data-campaign-slot="featured">
+        <HomeIntro campaign={general} part="featured" experience={experience} projects={projects} />
+      </div>
+      {others.map((c) => (
+        <>
+          <template data-campaign={c.id} data-slot="intro">
+            <HomeIntro campaign={c} part="intro" experience={experience} projects={projects} />
+          </template>
+          <template data-campaign={c.id} data-slot="featured">
+            <HomeIntro campaign={c} part="featured" experience={experience} projects={projects} />
+          </template>
+        </>
+      ))}
     </>
   )}
 
@@ -93,3 +81,26 @@ const education = await getEducation()
     </>
   )}
 </div>
+
+{variant === 'home' && <script is:inline define:vars={{ lookup }}>
+  // Pick this visit's campaign from ?utm_campaign= (validated against a fixed table) and swap in its intro before
+  // the page paints. Unknown or unsafe values keep the general intro. Remembered for the session only.
+  ;(function () {
+    try {
+      var raw = new URLSearchParams(location.search).get('utm_campaign')
+      var id = null
+      if (raw !== null) {
+        var v = raw.trim().toLowerCase()
+        id = /^[a-z0-9_-]{1,40}$/.test(v) && Object.prototype.hasOwnProperty.call(lookup, v) ? lookup[v] : 'general'
+        sessionStorage.setItem('campaign', id)
+      } else {
+        id = sessionStorage.getItem('campaign')
+      }
+      if (!id || id === 'general') return
+      document.querySelectorAll('template[data-campaign="' + id + '"]').forEach(function (t) {
+        var slot = document.querySelector('.plain [data-campaign-slot="' + t.getAttribute('data-slot') + '"]')
+        if (slot) slot.replaceChildren(t.content.cloneNode(true))
+      })
+    } catch (e) {}
+  })()
+</script>}

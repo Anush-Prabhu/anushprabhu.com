@@ -1,0 +1,136 @@
+---
+// Printable resume built from the same content as the rest of the site. No phone number, by design.
+import { profile } from '../../data/profile'
+import {
+  formatRange,
+  getCertifications,
+  getEducation,
+  getExperience,
+  getProjects,
+  getPublications,
+  getSkills,
+} from '../../lib/content'
+
+const [experience, skills, education, certifications, projects, publications] = await Promise.all([
+  getExperience(),
+  getSkills(),
+  getEducation(),
+  getCertifications(),
+  getProjects(),
+  getPublications(),
+])
+const strip = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')
+---
+
+<div class="content resume" data-app-content="resume">
+  <div class="resume-tools js-only">
+    <button type="button" class="btn primary" data-print>
+      Save as PDF
+    </button>
+    <span class="meta">Opens your browser's print dialog. Choose "Save as PDF".</span>
+  </div>
+
+  <header class="resume-head">
+    <h1>{profile.name}</h1>
+    <p class="resume-title">{profile.resumeTitle}</p>
+    <ul class="resume-contact" aria-label="Contact">
+      <li>{profile.location}</li>
+      {profile.email && (
+        <li>
+          <a href={`mailto:${profile.email}`}>{profile.email}</a>
+        </li>
+      )}
+      <li>
+        <a href={profile.linkedin}>{strip(profile.linkedin)}</a>
+      </li>
+      <li>
+        <a href={profile.github}>{strip(profile.github)}</a>
+      </li>
+    </ul>
+  </header>
+
+  <section aria-labelledby="r-skills">
+    <h2 id="r-skills">Technical skills</h2>
+    <dl class="resume-skills">
+      {skills.map((s) => (
+        <>
+          <dt>{s.data.group}</dt>
+          <dd>{s.data.items.join(', ')}</dd>
+        </>
+      ))}
+    </dl>
+  </section>
+
+  <section aria-labelledby="r-exp">
+    <h2 id="r-exp">Professional experience</h2>
+    {experience.map((e) => (
+      <article class="resume-item">
+        <div class="resume-line">
+          <h3>{e.data.company}</h3>
+          <span class="meta">{formatRange(e.data.start, e.data.end)}</span>
+        </div>
+        <p class="resume-role">
+          {e.data.role}, {e.data.focus.toLowerCase()}
+        </p>
+        <ul class="points">
+          {e.data.points.map((p) => (
+            <li>{p}</li>
+          ))}
+        </ul>
+      </article>
+    ))}
+  </section>
+
+  <section aria-labelledby="r-edu">
+    <h2 id="r-edu">Education</h2>
+    {education.map((e) => (
+      <article class="resume-item">
+        <div class="resume-line">
+          <h3>{e.data.school}</h3>
+          <span class="meta">{e.data.date}</span>
+        </div>
+        <p class="resume-role">
+          {e.data.degree}, {e.data.place}
+        </p>
+      </article>
+    ))}
+  </section>
+
+  <section aria-labelledby="r-certs">
+    <h2 id="r-certs">Certifications</h2>
+    <ul class="points">
+      {certifications.map((c) => (
+        <li>
+          {c.data.name} ({c.data.short})
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section aria-labelledby="r-proj">
+    <h2 id="r-proj">Projects and papers</h2>
+    {publications.map((p) => (
+      <article class="resume-item">
+        <h3>{p.data.title}</h3>
+        <p class="resume-role">
+          Publication{p.data.isbn && <>, online ISBN {p.data.isbn}</>}
+          {p.data.teamSize && <>, team of {p.data.teamSize}</>}
+        </p>
+      </article>
+    ))}
+    {projects.map((p) => (
+      <article class="resume-item">
+        <div class="resume-line">
+          <h3>{p.data.title}</h3>
+          <span class="meta">{p.data.stack.join(', ')}</span>
+        </div>
+        <p>{p.data.summary}</p>
+        {p.data.repo && (
+          <p class="meta">
+            <a href={p.data.repo}>{strip(p.data.repo)}</a>
+          </p>
+        )}
+      </article>
+    ))}
+  </section>
+</div>

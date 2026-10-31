@@ -101,7 +101,10 @@ function buildFs(d: SiteData): Node {
         },
       },
       contact: { kind: 'dir', children: { 'contact.txt': file((x) => contact(x), { app: 'contact' }) } },
-      'resume.pdf': file(() => [line(t('resume.pdf is a PDF. Try "open resume.pdf".', 'dim'))], { app: 'resume' }),
+      'resume.pdf': file(
+        () => [line(t('resume.pdf opens as a printable page. Try ', 'dim'), run('open resume.pdf'), t('.', 'dim'))],
+        { app: 'resume' },
+      ),
     },
   }
 }
@@ -139,7 +142,7 @@ const experience = (d: SiteData): Line[] => [
   ...d.experience.map((e) =>
     line(
       t(`${e.year}  `, 'dim'),
-      { text: e.company, tone: 'hi', action: { type: 'run', command: `cat ~/experience/${e.id}.txt` } },
+      { text: e.short, tone: 'hi', action: { type: 'run', command: `cat ~/experience/${e.id}.txt` } },
       t(`  ${e.role.toLowerCase()}`, 'dim'),
     ),
   ),
@@ -231,16 +234,7 @@ export const COMMANDS: Record<string, Command> = {
   resume: {
     summary: 'open the resume',
     run: () => ({
-      lines: [
-        line(t('The downloadable PDF is being prepared, with personal phone details removed.', 'dim')),
-        line(
-          t('Everything on it is already here: try ', 'dim'),
-          run('experience'),
-          t(' or ', 'dim'),
-          run('skills'),
-          t('.', 'dim'),
-        ),
-      ],
+      lines: [line(t('Opening the resume. Use "Save as PDF" on it to download a copy.', 'dim'))],
       effect: { type: 'open', app: 'resume' },
     }),
   },

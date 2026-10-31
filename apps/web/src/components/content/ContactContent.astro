@@ -5,27 +5,22 @@ import { profile } from '../../data/profile'
 <div class="content" data-app-content="contact">
   <h1>Contact</h1>
   <p class="lede" style="max-width:40ch">
-    The quickest way to reach me is LinkedIn. I read every message.
+    Email is the most direct way to reach me. I read every message.
   </p>
   <div class="actions">
-    <a class="btn primary" href={profile.linkedin} rel="noopener noreferrer" target="_blank">
+    {profile.email && (
+      <a class="btn primary" href={`mailto:${profile.email}`}>
+        Email {profile.email}
+      </a>
+    )}
+    <a class="btn" href={profile.linkedin} rel="noopener noreferrer" target="_blank">
       Message me on LinkedIn
     </a>
     <a class="btn" href={profile.github} rel="noopener noreferrer" target="_blank">
       See my GitHub
     </a>
-    {profile.email && (
-      <a class="btn" href={`mailto:${profile.email}`}>
-        Email me
-      </a>
-    )}
   </div>
-  {!profile.email && (
-    <p class="meta" style="margin-top:18px">
-      An email address and contact form are coming soon.
-    </p>
-  )}
-  <p class="meta" style="margin-top:8px">
-    Based in {profile.location}.
+  <p class="meta" style="margin-top:18px">
+    Based in {profile.location}. You can also <a href="/resume">view or save my resume</a>.
   </p>
 </div>

@@ -28,6 +28,14 @@ npm run dev          # http://localhost:4322
 | `npm run e2e` | Browser tests against the production build (first run: `npx playwright install chromium` in `apps/web`) |
 | `npm run budget -w apps/web` | Fails if shipped JS or home-page weight exceed the budgets (run after a build) |
 | `npm run format` | Prettier |
+| `node apps/web/scripts/make-og.mjs` | Re-render the social preview image `public/og.png` |
+
+## Campaign links
+
+Add `?utm_campaign=security`, `research` or `product` to a link to the home page to lead with that side of the work
+(e.g. `https://anushprabhu.com/?utm_source=linkedin&utm_campaign=security`). Campaigns are defined in
+`apps/web/src/data/campaigns.ts`; they can only reorder and re-word existing content, and the build fails if one refers
+to something that doesn't exist.
 
 ## Using the desktop
 

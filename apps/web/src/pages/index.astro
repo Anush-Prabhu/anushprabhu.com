@@ -2,9 +2,16 @@
 import Base from '../layouts/Base.astro'
 import AboutContent from '../components/content/AboutContent.astro'
 import MobileHome from '../components/content/MobileHome.astro'
+import { getEducation, getSkills } from '../lib/content'
+import { personGraph } from '../lib/structured-data'
+
+const jsonLd = personGraph({
+  skills: (await getSkills()).flatMap((s) => s.data.items),
+  education: (await getEducation()).map((e) => ({ school: e.data.school })),
+})
 ---
 
-<Base app="about" path="~">
+<Base app="about" path="~" jsonLd={jsonLd}>
   <AboutContent variant="home">
     <MobileHome slot="after-intro" />
   </AboutContent>

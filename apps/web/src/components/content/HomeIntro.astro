@@ -1,0 +1,61 @@
+---
+// The campaign-controlled parts of the home page. Rendered once visibly (general) and once per other campaign inside a
+// <template>, which the inline script in AboutContent swaps in.
+import type { CollectionEntry } from 'astro:content'
+import type { Campaign } from '../../data/campaigns'
+import { formatRange } from '../../lib/content'
+
+interface Props {
+  campaign: Campaign
+  part: 'intro' | 'featured'
+  experience: CollectionEntry<'experience'>[]
+  projects: CollectionEntry<'projects'>[]
+}
+const { campaign, part, experience, projects } = Astro.props
+const featuredExperience = campaign.featuredExperience.map((id) => experience.find((e) => e.id === id)!)
+const featuredProjects = campaign.featuredProjects.map((id) => projects.find((p) => p.id === id)!)
+---
+
+{part === 'intro' && (
+  <>
+    <p class="lede">{campaign.headline}</p>
+    <div class="actions">
+      <a class="btn primary" href={campaign.primaryCta.href}>
+        {campaign.primaryCta.label}
+      </a>
+      <a class="btn" href="/contact">
+        Get in touch
+      </a>
+    </div>
+  </>
+)}
+{part === 'featured' && (
+  <>
+    <h2>Recent work</h2>
+    <ul class="list">
+      {featuredExperience.map((e) => (
+        <li class="row">
+          <div>
+            <h3>{e.data.short}</h3>
+            <p class="meta">{formatRange(e.data.start, e.data.end)}</p>
+          </div>
+          <p>{e.data.highlight}</p>
+        </li>
+      ))}
+    </ul>
+    <p style="margin-top:14px">
+      <a href="/experience">See all experience</a>
+    </p>
+    <h2>Selected projects</h2>
+    <ul class="list">
+      {featuredProjects.map((p) => (
+        <li class="row">
+          <h3>
+            <a href={`/projects/${p.id}`}>{p.data.title}</a>
+          </h3>
+          <p>{p.data.summary}</p>
+        </li>
+      ))}
+    </ul>
+  </>
+)}

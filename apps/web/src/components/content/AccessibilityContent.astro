@@ -1,0 +1,62 @@
+---
+import { profile } from '../../data/profile'
+const updated = '31 October 2026'
+---
+
+<div class="content" data-app-content="accessibility">
+  <h1>Accessibility</h1>
+  <p class="meta">Last updated {updated}</p>
+
+  <p style="margin-top:18px">
+    I want this site to work for everyone, including people who use a keyboard, a screen reader, zoom or a phone. The
+    target is <strong>WCAG 2.2 level AA</strong>.
+  </p>
+
+  <h2>What the site does</h2>
+  <ul class="points">
+    <li>Every page is plain, structured HTML that works without JavaScript.</li>
+    <li>
+      The desktop view is optional. "Switch to plain view" in the session menu (power icon) turns it off, and the
+      setting is remembered.
+    </li>
+    <li>
+      Everything in the desktop works from the keyboard. Snap Layouts opens with Alt+Z or the down arrow on a window's
+      maximise button, never only on hover.
+    </li>
+    <li>The terminal never has to be typed into: every suggested command is a button.</li>
+    <li>
+      Focus is always visible, colours meet AA contrast, and animation is turned off if your system asks for reduced
+      motion.
+    </li>
+    <li>On phones and tablets, controls are at least 44 pixels so they are easy to tap.</li>
+  </ul>
+
+  <h2>Keyboard shortcuts</h2>
+  <dl class="resume-skills">
+    <dt>Ctrl+K</dt>
+    <dd>Search apps and content</dd>
+    <dt>` or Ctrl+Alt+T</dt>
+    <dd>Open the terminal</dd>
+    <dt>Alt+Z</dt>
+    <dd>Snap layouts for the focused window</dd>
+    <dt>Alt+Shift+arrows</dt>
+    <dd>Snap, maximise or restore the focused window</dd>
+    <dt>Alt+`</dt>
+    <dd>Cycle windows</dd>
+    <dt>Alt+W</dt>
+    <dd>Close the focused window</dd>
+  </dl>
+
+  <h2>Known limitations</h2>
+  <p>
+    The desktop view behaves like an application, which some screen readers handle less smoothly than a normal page. If
+    that's your experience, the plain view has exactly the same content.
+  </p>
+
+  <h2>Report a problem</h2>
+  <p>
+    If something doesn't work for you, please tell me:{' '}
+    {profile.email ? <a href={`mailto:${profile.email}`}>{profile.email}</a> : 'see the contact page'}. Say which page
+    and what you were trying to do, and I'll fix it.
+  </p>
+</div>

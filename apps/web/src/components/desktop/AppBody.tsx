@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
+import { applyCampaign } from '../../lib/campaign-dom'
 import { appForPath, type AppId } from './apps'
 
 /** Rendered page content, keyed by path (without hash). Shared by every window. */
@@ -11,6 +12,7 @@ export function extractContent(html: string): string | null {
   const doc = new DOMParser().parseFromString(html, 'text/html')
   const root = doc.querySelector('[data-app-content]')
   if (!root) return null
+  applyCampaign(root)
   root.querySelectorAll('h1').forEach((h1) => {
     const h2 = doc.createElement('h2')
     h2.className = `h1 ${h1.className}`.trim()
@@ -102,25 +104,5 @@ export function AppBody({ app, path, onNavigate }: AppBodyProps) {
       onClick={onClick as never}
       dangerouslySetInnerHTML={{ __html: html }}
     />
-  )
-}
-
-export function ResumeNotice({ onOpen }: { onOpen(app: AppId): void }) {
-  return (
-    <div class="content">
-      <h2 class="h1" style="font-size:24px">
-        Resume
-      </h2>
-      <p style="margin-top:10px">The downloadable PDF is being prepared, with personal phone details removed.</p>
-      <p>Everything on it is already here: experience, projects, skills and certifications.</p>
-      <div class="actions">
-        <button type="button" class="btn primary" onClick={() => onOpen('experience')}>
-          Open Experience
-        </button>
-        <button type="button" class="btn" onClick={() => onOpen('skills')}>
-          Open Skills
-        </button>
-      </div>
-    </div>
   )
 }

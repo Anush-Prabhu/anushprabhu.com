@@ -1,5 +1,5 @@
 import type { SiteData } from '../../lib/site-data'
-import { APPS, SHORTCUTS, type AppId, type IconName } from './apps'
+import { APPS, INFO_APPS, SHORTCUTS, type AppId, type IconName } from './apps'
 
 export interface SearchItem {
   key: string
@@ -14,7 +14,7 @@ export interface SearchItem {
 }
 
 export function buildIndex(d: SiteData): SearchItem[] {
-  const apps = SHORTCUTS.map((id) => ({
+  const apps = [...SHORTCUTS, ...INFO_APPS].map((id) => ({
     key: `app:${id}`,
     title: APPS[id].title,
     body: '',

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 import type { SiteData } from '../../lib/site-data'
 import { complete, displayPath, execute, type Effect, type Line, type SpanAction } from './terminal/commands'
 
-const CHIPS = ['experience', 'projects', 'skills', 'research', 'contact', 'resume']
+const DEFAULT_CHIPS = ['experience', 'projects', 'skills', 'research', 'contact', 'resume']
 const TYPE_MS = 28
 
 type Entry = { kind: 'cmd'; cwd: string[]; text: string } | { kind: 'out'; line: Line } | { kind: 'welcome' }
@@ -14,6 +14,8 @@ export interface TerminalProps {
   onLink(url: string): void
   /** Phone layout: commands and prompt pinned at the bottom; the keyboard is not opened automatically. */
   docked?: boolean
+  /** Suggested commands (they vary by campaign). */
+  chips?: string[]
 }
 
 function Prompt({ cwd, user, host }: { cwd: string[]; user: string; host: string }) {
@@ -151,7 +153,7 @@ export function Terminal(p: TerminalProps) {
 
   const chips = (
     <div class="chips" role="group" aria-label="Suggested commands">
-      {CHIPS.map((c) => (
+      {(p.chips ?? DEFAULT_CHIPS).map((c) => (
         <button type="button" class="chip" key={c} onClick={() => typeAndRun(c)} disabled={typing}>
           {c}
         </button>

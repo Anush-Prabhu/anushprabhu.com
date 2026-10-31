@@ -9,11 +9,15 @@ const experience = defineCollection({
   schema: z.object({
     order: z.number(),
     company: z.string(),
+    /** Short name for tight spaces (terminal, home page). */
+    short: z.string(),
     role: z.string(),
     focus: z.string(),
     start: month,
     end: month.nullable(),
     points: z.array(z.string()).min(1),
+    /** One-line summary drawn from `points`, used on the home page. */
+    highlight: z.string(),
     tech: z.array(z.string()),
   }),
 })

@@ -3,6 +3,7 @@
     "id": "jhh",
     "order": 1,
     "company": "Johns Hopkins Hospital",
+    "short": "Johns Hopkins Hospital",
     "role": "Compliance Analyst",
     "focus": "Data quality and privacy",
     "start": "2025-09",
@@ -11,12 +12,14 @@
       "Identified third-party data pipeline issues in the Vaccine Management System, strengthening data quality and process reliability.",
       "Handled PII per policy, supporting issue resolution through secure records, validation controls, traceability, and reviewable documentation."
     ],
-    "tech": ["Data validation", "PII handling", "Documentation"]
+    "tech": ["Data validation", "PII handling", "Documentation"],
+    "highlight": "Found third-party data pipeline issues in the Vaccine Management System and improved data quality and reliability."
   },
   {
     "id": "jio",
     "order": 2,
     "company": "Jio Platforms Limited",
+    "short": "Jio Platforms",
     "role": "Security Analytics Intern",
     "focus": "Detection engineering and SIEM",
     "start": "2025-06",
@@ -26,12 +29,14 @@
       "Contributed to defining selective pipelines for Azure VM and GCP identity telemetry ingestion into Wazuh for SIEM monitoring.",
       "Supported consolidation of multi-source telemetry into curated threat-intel blocklists for SOC enrichment, triage, and monitoring."
     ],
-    "tech": ["Wazuh", "Azure", "GCP", "Python", "Threat intel"]
+    "tech": ["Wazuh", "Azure", "GCP", "Python", "Threat intel"],
+    "highlight": "Prototyped a Cisco ASA/FTD log scanner to speed up SOC triage."
   },
   {
     "id": "jhmi",
     "order": 3,
     "company": "Johns Hopkins Medical Institutions (Global Neuropsychology, Inc.)",
+    "short": "Johns Hopkins Medicine",
     "role": "Research Assistant",
     "focus": "Privacy, applied AI and web systems",
     "start": "2024-09",
@@ -41,12 +46,14 @@
       "Standardized privacy-focused data handling across 60+ multilingual forms and 25+ language-based research workflows for reviewability.",
       "Supported JHU faculty with PII handling, data-integrity checks, and reviewable documentation across research workflows."
     ],
-    "tech": ["RAG", "Python", "Privacy"]
+    "tech": ["RAG", "Python", "Privacy"],
+    "highlight": "Built a RAG system with grounded retrieval, consistency checks and safe fallbacks."
   },
   {
     "id": "bofa",
     "order": 4,
     "company": "Bank of America",
+    "short": "Bank of America",
     "role": "Quality Specialist",
     "focus": "IAM automation and test engineering",
     "start": "2023-07",
@@ -57,12 +64,14 @@
       "Built Splunk log validations for IAM workflows on RHEL/OpenShift to verify security controls and support evidence-ready documentation.",
       "Automated end-to-end validation with Cypress (TypeScript), improving coverage and reliability; produced evidence-ready documentation."
     ],
-    "tech": ["Active Directory", "Kerberos", "gMSA", "Splunk", "OpenShift", "Cypress", "TypeScript"]
+    "tech": ["Active Directory", "Kerberos", "gMSA", "Splunk", "OpenShift", "Cypress", "TypeScript"],
+    "highlight": "Automated the service-account and gMSA lifecycle, cutting provisioning from days to hours."
   },
   {
     "id": "prabhutech",
     "order": 5,
     "company": "Prabhu Tech",
+    "short": "Prabhu Tech",
     "role": "Proprietor and Founder",
     "focus": "Web platforms and automation",
     "start": "2019-09",
@@ -71,6 +80,7 @@
       "Founded and operated a registered digital firm: scoped requirements, built platforms, managed delivery, and administered client systems.",
       "Delivered WordPress sites with e-commerce, payments, DNS, analytics, SEO, identity/access integration, and operational automation."
     ],
-    "tech": ["WordPress", "E-commerce", "DNS", "SEO"]
+    "tech": ["WordPress", "E-commerce", "DNS", "SEO"],
+    "highlight": "Founded and ran a registered digital firm: scoped requirements, built platforms and managed delivery for clients."
   }
 ]

@@ -5,6 +5,7 @@ import { Icon } from '../components/desktop/Icon'
 import { site, profile } from '../data/profile'
 import { getSiteData } from '../lib/content'
 import { NAV, type AppId } from '../components/desktop/apps'
+import { toJsonLd } from '../lib/structured-data'
 
 interface Props {
   title?: string
@@ -13,9 +14,12 @@ interface Props {
   app: AppId
   /** Shown in the plain view's window-style frame, e.g. "~/experience". */
   path: string
+  /** Structured data for this page (JSON-LD). */
+  jsonLd?: unknown
 }
 
-const { title, description = site.description, app, path } = Astro.props
+const { title, description = site.description, app, path, jsonLd } = Astro.props
+const ogImage = new URL('/og.png', site.url).href
 const fullTitle = title ? `${title} — ${site.title}` : `${site.title} — security engineering, automation, applied AI`
 // With build.format 'file', pathnames arrive as "/index.html" and "/experience.html"; URLs never show either.
 const cleanPath =
@@ -43,7 +47,14 @@ const data = await getSiteData()
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:site_name" content={site.title} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Anush Prabhu: security engineering, automation and applied AI" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImage} />
+    {jsonLd && <script type="application/ld+json" set:html={toJsonLd(jsonLd)} />}
     <script is:inline>
       // Runs before paint: mark JS available and, where the desktop will load (tablet and up), hide the plain
       // view while it starts. The CSS falls back to the plain view after 3 s if the desktop never mounts.
@@ -106,6 +117,22 @@ const data = await getSiteData()
       </div>
     </main>
     <footer class="plain plain-footer">
+      <nav aria-label="Site information">
+        <ul>
+          <li>
+            <a href="/resume">Resume</a>
+          </li>
+          <li>
+            <a href="/privacy">Privacy</a>
+          </li>
+          <li>
+            <a href="/terms">Terms</a>
+          </li>
+          <li>
+            <a href="/accessibility">Accessibility</a>
+          </li>
+        </ul>
+      </nav>
       <p>
         © {new Date().getFullYear()} {profile.name}
       </p>

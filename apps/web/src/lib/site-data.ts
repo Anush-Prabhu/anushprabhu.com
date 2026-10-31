@@ -15,6 +15,7 @@ export interface SiteData {
   experience: {
     id: string
     company: string
+    short: string
     role: string
     focus: string
     dates: string
@@ -27,4 +28,6 @@ export interface SiteData {
   certifications: { name: string; short: string }[]
   education: { degree: string; school: string; date: string }[]
   publications: { title: string; status: string; isbn: string | null }[]
+  /** Suggested terminal commands per campaign id. */
+  campaignChips: Record<string, string[]>
 }
